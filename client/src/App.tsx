@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import Home from './pages/Landing/Home';
 
 function App() {
 	return (
-		<div className="w-screen">
-			<h1 className="text-3xl text-red-400 underline">Altschool</h1>
-		</div>
+		<>
+			<Routes>
+				<Route path="/" element={<Home />} />
+			</Routes>
+		</>
 	);
 }
 
