@@ -20,7 +20,9 @@ const Testimonials = () => {
 							Adebobola Muhydeen, <span className="font-normal text-sm">Software developer at Apple</span>
 						</p>
 
-						<Button text="Join Chatter" />
+						<div className="w-[130px]">
+							<Button text="Join Chatter" />
+						</div>
 					</div>
 				</div>
 			</div>
@@ -38,7 +40,9 @@ const Testimonials = () => {
 							same interests and goals
 						</p>
 
-						<Button text="Get Started" />
+						<div className="w-[130px]">
+							<Button text="Get Started" />
+						</div>
 					</div>
 				</div>
 			</div>

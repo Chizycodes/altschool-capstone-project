@@ -11,7 +11,9 @@ const Hero = () => {
 					<p className="mb-5 text-[24px] font-medium">
 						Unleash the Power of Words, Connect with Like-minded Readers and Writers
 					</p>
-					<Button text="Get Started" styles="mt-5 bg-primary" />
+					<div className='w-[140px] mt-5'>
+						<Button text="Get Started" />
+					</div>
 				</div>
 			</div>
 		</div>

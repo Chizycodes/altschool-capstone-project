@@ -3,6 +3,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+    .c_input {
+        @apply input input-bordered border-[#CED4DA] focus:outline-none input-sm w-full h-10 text-[#212529];
+    }
+}
+
 *{
     margin: 0;
     padding: 0;

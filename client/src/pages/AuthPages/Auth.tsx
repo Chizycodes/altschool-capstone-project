@@ -20,28 +20,28 @@ const Auth = () => {
 						</div>
 					</div>
 				</div>
-				<div className="w-[60%] px-20 py-10">
+				<div className="w-[60%] px-20 py-10 h-screen overflow-y-auto">
 					<div className="max-w-[70%] mx-auto">
 						<div className="tabs font-bold">
 							<Link
 								to="/register"
-								className={`tab tab-bordered text-left pl-0 w-1/2 justify-start border-b-[6px] border-[#D9D9D9] ${
-									pathname === '/register' ? 'border-[#543EE0]' : ''
+								className={`tab tab-bordered text-left pl-0 w-1/2 justify-start border-b-[6px]  ${
+									pathname === '/register' ? 'border-[#543EE0]' : 'border-[#D9D9D9]'
 								}`}
 							>
 								REGISTER
 							</Link>
 							<Link
 								to="/login"
-								className={`tab tab-bordered text-right pr-0 w-1/2 justify-end border-b-[6px] border-[#D9D9D9] ${
-									pathname === '/login' ? 'border-[#543EE0]' : ''
+								className={`tab tab-bordered text-right pr-0 w-1/2 justify-end border-b-[6px]  ${
+									pathname === '/login' ? 'border-[#543EE0]' : 'border-[#D9D9D9]'
 								}`}
 							>
 								LOG IN
 							</Link>
 						</div>
 
-						<div className='mt-10'>
+						<div className="pt-10 flex flex-col justify-center h-[calc(100vh-200px)]">
 							{pathname === '/register' && <Register />}
 
 							{pathname === '/login' && <Login />}
