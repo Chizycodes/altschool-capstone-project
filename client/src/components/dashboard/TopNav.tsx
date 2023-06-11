@@ -8,7 +8,8 @@ export const TopNav = ({ profile, setProfile, show, setShow }) => {
 	};
 	const user = {
 		displayName: 'John Doe',
-		email: '',
+		email: 'okwudirejoy@gmail.com',
+		username: 'chizycodes',
 	};
 	return (
 		<nav className="h-[78px] flex items-center justify-between bg-[#ffffff] shadow relative z-10 pl-6">
@@ -37,13 +38,21 @@ export const TopNav = ({ profile, setProfile, show, setShow }) => {
 						</svg>
 					)}
 				</div>
-				<img src="/images/logo.svg" alt="Logo.svg" className="xl:hidden block" />
+				<img src="/images/logo.svg" alt="Logo.svg" className="xl:hidden block w-[8rem]" />
 			</div>
 
-			<div className="flex w-full pr-6">
-				<div className="w-1/2 h-full flex items-center pl-6 pr-24"></div>
-				<div className="w-1/2 flex">
-					<div className="w-full flex items-center pl-8 gap-3 justify-end">
+			<div className="flex justify-between gap-3 items-center w-full pr-6">
+				<div></div>
+				<div className="w-full max-w-2xl h-full flex justify-end items-center pl-6 ">
+					<div className="w-[90%] hidden sm:block">
+						<div className="relative">
+							<input type="search" placeholder="Search Chatter" className="c_input rounded-full pl-10" />
+							<img src="/images/search-icon.svg" alt="search icon" className="absolute top-1/4 left-3" />
+						</div>
+					</div>
+				</div>
+				<div className="flex">
+					<div className="w-full flex items-center pl-8 gap-2 justify-end">
 						<div className="min-w-[32px] min-h-[32px] rounded-full bg-[#F5F6FA] flex items-center justify-center">
 							<div className="relative cursor-pointer">
 								<img src="/images/notif-icon.svg" alt="notification bell" />
@@ -51,67 +60,10 @@ export const TopNav = ({ profile, setProfile, show, setShow }) => {
 							</div>
 						</div>
 
-						<div className="flex items-center relative cursor-pointer" onClick={() => setProfile(!profile)}>
-							<div className="rounded-full">
-								{profile ? (
-									<ul className="p-2 w-full bg-[#ffffff] absolute rounded left-0 shadow mt-12 sm:mt-16 ">
-										<li className="flex w-full justify-between text-gray-600 hover:text-indigo-700 cursor-pointer items-center">
-											<div className="flex items-center">
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													className="icon icon-tabler icon-tabler-user"
-													width={18}
-													height={18}
-													viewBox="0 0 24 24"
-													strokeWidth="1.5"
-													stroke="currentColor"
-													fill="none"
-													strokeLinecap="round"
-													strokeLinejoin="round"
-												>
-													<path stroke="none" d="M0 0h24v24H0z" />
-													<circle cx={12} cy={7} r={4} />
-													<path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
-												</svg>
-												<span className="text-sm ml-2">My Profile</span>
-											</div>
-										</li>
-										<li className="flex w-full justify-between text-gray-600 hover:text-indigo-700 cursor-pointer items-center mt-2">
-											<div className="flex items-center">
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													className="icon icon-tabler icon-tabler-logout"
-													width={20}
-													height={20}
-													viewBox="0 0 24 24"
-													strokeWidth="1.5"
-													stroke="currentColor"
-													fill="none"
-													strokeLinecap="round"
-													strokeLinejoin="round"
-												>
-													<path stroke="none" d="M0 0h24v24H0z" />
-													<path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
-													<path d="M7 12h14l-3 -3m0 6l3 -3" />
-												</svg>
-												<span className="text-sm ml-2" onClick={() => logOut()}>
-													Sign out
-												</span>
-											</div>
-										</li>
-									</ul>
-								) : (
-									''
-								)}
-							</div>
-
-							<div className="flex items-center bg-[#f5f6fa] py-2 px-3 gap-2 rounded-xl">
+						<div className="dropdown dropdown-hover dropdown-end">
+							<label tabIndex={0} className="flex items-center py-2 px-3 gap-1">
 								<div className="w-[32px] h-[32px] text-[#fff] bg-primary rounded-full flex items-center justify-center text-base">
 									JT
-								</div>
-								<div className="hidden md:block">
-									<p className="text-base text-[#000000] font-bold">{user?.displayName}</p>
-									<p className="text-[#65717c] text-sm">{user?.email}</p>
 								</div>
 
 								<div className="cursor-pointer text-gray-600">
@@ -132,7 +84,64 @@ export const TopNav = ({ profile, setProfile, show, setShow }) => {
 										<polyline points="6 9 12 15 18 9" />
 									</svg>
 								</div>
-							</div>
+							</label>
+							<ul tabIndex={0} className="dropdown-content menu bg-white p-2 shadow rounded-box w-52">
+								<li className="border-b border-[#e6e4e4]">
+									<div className="flex flex-row items-center gap-3">
+										<div className="w-[40px] h-[40px] text-[#fff] bg-primary rounded-full flex items-center justify-center text-base">
+											JT
+										</div>
+										<div className="flex flex-col items-start">
+											<h6 className="text-sm font-semibold">{user.displayName}</h6>
+											<p className="text-xs text-gray-600">@{user.username}</p>
+										</div>
+									</div>
+								</li>
+								<li className="">
+									<div className="flex items-center gap-2">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											className="icon icon-tabler icon-tabler-user"
+											width={18}
+											height={18}
+											viewBox="0 0 24 24"
+											strokeWidth="1.5"
+											stroke="currentColor"
+											fill="none"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										>
+											<path stroke="none" d="M0 0h24v24H0z" />
+											<circle cx={12} cy={7} r={4} />
+											<path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+										</svg>
+										<span className="text-sm">Account Settings</span>
+									</div>
+								</li>
+								<li className="">
+									<div className="flex items-center gap-2">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											className="icon icon-tabler icon-tabler-logout"
+											width={20}
+											height={20}
+											viewBox="0 0 24 24"
+											strokeWidth="1.5"
+											stroke="currentColor"
+											fill="none"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										>
+											<path stroke="none" d="M0 0h24v24H0z" />
+											<path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+											<path d="M7 12h14l-3 -3m0 6l3 -3" />
+										</svg>
+										<span className="text-sm text-red-600" onClick={() => logOut()}>
+											Log out
+										</span>
+									</div>
+								</li>
+							</ul>
 						</div>
 					</div>
 				</div>

@@ -7,7 +7,7 @@ const PrivateRoutes = () => {
 	return (
 		<Routes>
 			<Route element={<Dashboardlayout />}>
-				<Route path="feed" element={<Feed />} />
+				<Route index element={<Feed />} />
 			</Route>
 		</Routes>
 	);

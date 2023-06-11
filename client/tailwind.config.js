@@ -7,6 +7,7 @@ export default {
 				primary: '#543EE0',
 				text: '#111111',
 				gray: '#626262',
+				'light_gray': '#D0D0D0',
 			},
 		},
 	},

@@ -104,8 +104,8 @@ export const SideBar = ({ show, setShow }) => {
 									</svg>
 								</div>
 							</div>
-							
-							<div className="flex flex-col justify-between h-[calc(100vh-64px)] overflow-y-auto ">
+
+							<div className="flex flex-col h-[calc(100vh-64px)] overflow-y-auto ">
 								<ul className="py-3">
 									{navItems.overview.map((item, i) => {
 										return (
