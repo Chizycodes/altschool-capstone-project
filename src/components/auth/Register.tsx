@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Button from '../general/Button';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase';
+import { toast } from 'react-toastify';
 
 const schema = yup.object().shape({
 	firstName: yup.string().required().label('First Name'),
@@ -13,14 +16,29 @@ const schema = yup.object().shape({
 });
 
 const Register = () => {
+	const [loading, setLoading] = useState(false);
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
 	} = useForm({ resolver: yupResolver(schema) });
 
-	const onsubmit = (data) => {
-		console.log(data);
+	const onsubmit = (data: any) => {
+		setLoading(true);
+		const { emailAddress, password, firstName, lastName } = data;
+		createUserWithEmailAndPassword(auth, emailAddress, password)
+			.then((userCredential) => {
+				const user = userCredential.user;
+				console.log(user, user);
+				setLoading(false);
+				toast.success('Account created successfully');
+			})
+			.catch((error) => {
+				const errorCode = error.code;
+				const errorMessage = error.message;
+				setLoading(false);
+				toast.error(errorCode);
+			});
 	};
 	return (
 		<div>
@@ -57,7 +75,7 @@ const Register = () => {
 						<label htmlFor="password" className="block text-sm text-[#3B3B3B]">
 							Password
 						</label>
-						<input {...register('password')} type="text" className="c_input" />
+						<input {...register('password')} type="password" className="c_input" />
 						<p className="text-xs text-red-600">{errors?.password?.message?.toString()}</p>
 					</div>
 
@@ -65,7 +83,7 @@ const Register = () => {
 						<label htmlFor="confirmPassword" className="block text-sm text-[#3B3B3B]">
 							Confirm Password
 						</label>
-						<input {...register('confirmPassword')} type="text" className="c_input" />
+						<input {...register('confirmPassword')} type="password" className="c_input" />
 						<p className="text-xs text-red-600">{errors?.confirmPassword?.message?.toString()}</p>
 					</div>
 

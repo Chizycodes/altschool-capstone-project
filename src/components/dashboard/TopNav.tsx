@@ -1,16 +1,11 @@
-import React from 'react';
-// import { UserAuth } from '../context/AuthContext';
+import React, { useContext } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { Link } from 'react-router-dom';
+import Button from '../general/Button';
 
-export const TopNav = ({ profile, setProfile, show, setShow }) => {
-	// const { logOut, user } = UserAuth();
-	const logOut = () => {
-		console.log('logout');
-	};
-	const user = {
-		displayName: 'John Doe',
-		email: 'okwudirejoy@gmail.com',
-		username: 'chizycodes',
-	};
+export const TopNav = ({ show, setShow }) => {
+	const { dispatch, currentUser } = useAuth();
+	console.log(currentUser, 'user-top');
 	return (
 		<nav className="h-[78px] flex items-center justify-between bg-[#ffffff] shadow relative z-10 pl-6">
 			<div className="flex items-center gap-2">
@@ -63,7 +58,17 @@ export const TopNav = ({ profile, setProfile, show, setShow }) => {
 						<div className="dropdown dropdown-hover dropdown-end">
 							<label tabIndex={0} className="flex items-center py-2 px-3 gap-1">
 								<div className="w-[32px] h-[32px] text-[#fff] bg-primary rounded-full flex items-center justify-center text-base">
-									JT
+									{currentUser ? (
+										<>
+											{currentUser?.photoURL ? (
+												<img src={currentUser?.photoURL} alt="user" className="w-full h-full rounded-full" />
+											) : (
+												currentUser?.displayName?.split(' ')[0][0] + currentUser?.displayName?.split(' ')[1][0]
+											)}
+										</>
+									) : (
+										<img src="/images/avatar.svg" alt="" className="w-full h-full rounded-full" />
+									)}
 								</div>
 
 								<div className="cursor-pointer text-gray-600">
@@ -85,62 +90,75 @@ export const TopNav = ({ profile, setProfile, show, setShow }) => {
 									</svg>
 								</div>
 							</label>
-							<ul tabIndex={0} className="dropdown-content menu bg-white p-2 shadow rounded-box w-52">
-								<li className="border-b border-[#e6e4e4]">
-									<div className="flex flex-row items-center gap-3">
-										<div className="w-[40px] h-[40px] text-[#fff] bg-primary rounded-full flex items-center justify-center text-base">
-											JT
+							<ul tabIndex={0} className="dropdown-content menu bg-white p-4 shadow rounded-box w-60">
+								{currentUser ? (
+									<>
+										<li className="border-b border-[#e6e4e4]">
+											<div className="flex flex-row items-center gap-3">
+												<div className="flex flex-col items-start">
+													<h6 className="text-sm font-semibold">{currentUser?.displayName}</h6>
+													<p className="text-xs text-gray-600">{currentUser?.email}</p>
+												</div>
+											</div>
+										</li>
+										<li className="">
+											<div className="flex items-center gap-2">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													className="icon icon-tabler icon-tabler-user"
+													width={18}
+													height={18}
+													viewBox="0 0 24 24"
+													strokeWidth="1.5"
+													stroke="currentColor"
+													fill="none"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+												>
+													<path stroke="none" d="M0 0h24v24H0z" />
+													<circle cx={12} cy={7} r={4} />
+													<path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+												</svg>
+												<span className="text-sm">Account Settings</span>
+											</div>
+										</li>
+										<li className="">
+											<div className="flex items-center gap-2">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													className="icon icon-tabler icon-tabler-logout"
+													width={20}
+													height={20}
+													viewBox="0 0 24 24"
+													strokeWidth="1.5"
+													stroke="currentColor"
+													fill="none"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+												>
+													<path stroke="none" d="M0 0h24v24H0z" />
+													<path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+													<path d="M7 12h14l-3 -3m0 6l3 -3" />
+												</svg>
+												<span className="text-sm text-red-600" onClick={() => dispatch({ type: 'LOGOUT' })}>
+													Log out
+												</span>
+											</div>
+										</li>
+									</>
+								) : (
+									<>
+										<div className="">
+											<p className='text-lg font-semibold text-center mb-3'>Sign up or Login to your Chatter account</p>
+											<Link to="/login" className="">
+												<Button text="Log in" styles="bg-white w-full my-5" />
+											</Link>
+											<Link to="/register" className="">
+												<Button text="Sign up" styles="bg-primary text-white w-full" />
+											</Link>
 										</div>
-										<div className="flex flex-col items-start">
-											<h6 className="text-sm font-semibold">{user.displayName}</h6>
-											<p className="text-xs text-gray-600">@{user.username}</p>
-										</div>
-									</div>
-								</li>
-								<li className="">
-									<div className="flex items-center gap-2">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											className="icon icon-tabler icon-tabler-user"
-											width={18}
-											height={18}
-											viewBox="0 0 24 24"
-											strokeWidth="1.5"
-											stroke="currentColor"
-											fill="none"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-										>
-											<path stroke="none" d="M0 0h24v24H0z" />
-											<circle cx={12} cy={7} r={4} />
-											<path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
-										</svg>
-										<span className="text-sm">Account Settings</span>
-									</div>
-								</li>
-								<li className="">
-									<div className="flex items-center gap-2">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											className="icon icon-tabler icon-tabler-logout"
-											width={20}
-											height={20}
-											viewBox="0 0 24 24"
-											strokeWidth="1.5"
-											stroke="currentColor"
-											fill="none"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-										>
-											<path stroke="none" d="M0 0h24v24H0z" />
-											<path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
-											<path d="M7 12h14l-3 -3m0 6l3 -3" />
-										</svg>
-										<span className="text-sm text-red-600" onClick={() => logOut()}>
-											Log out
-										</span>
-									</div>
-								</li>
+									</>
+								)}
 							</ul>
 						</div>
 					</div>

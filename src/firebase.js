@@ -1,12 +1,9 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
-// import { getAuth } from 'firebase/auth';
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
-	apiKey: 'AIzaSyAHfRbWxC-4d4gh8qWVbeXNv9fKrAhu_Bg',
+	apiKey: import.meta.env.VITE_FIREBASE_KEY,
 	authDomain: 'chatter-23337.firebaseapp.com',
 	projectId: 'chatter-23337',
 	storageBucket: 'chatter-23337.appspot.com',
@@ -15,6 +12,6 @@ const firebaseConfig = {
 	measurementId: 'G-VWEHLKNQX3',
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-// export const auth = getAuth(app);
+export const auth = getAuth(app);
+export const db = getFirestore(app);

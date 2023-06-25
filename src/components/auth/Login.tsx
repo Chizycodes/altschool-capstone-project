@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Button from '../general/Button';
 import { useNavigate } from 'react-router-dom';
+import { GoogleAuthProvider, signInWithRedirect, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase';
+import { toast } from 'react-toastify';
+import {	 useAuth } from '../../context/AuthContext';
 
 interface SchemaProps {
 	emailAddress: string;
@@ -17,6 +21,8 @@ const schema = yup.object().shape({
 
 const Login = () => {
 	const navigate = useNavigate();
+	const { dispatch } = useAuth();
+	const [loading, setLoading] = useState(false);
 	const {
 		register,
 		handleSubmit,
@@ -24,9 +30,29 @@ const Login = () => {
 	} = useForm({ resolver: yupResolver(schema) });
 
 	const onsubmit = (data: any) => {
-		console.log(data);
-		navigate('/feed');
-	}
+		setLoading(true);
+		const { emailAddress, password } = data;
+		signInWithEmailAndPassword(auth, emailAddress, password)
+			.then((userCredential) => {
+				const user = userCredential.user;
+				dispatch({ type: 'LOGIN', payload: user });
+				setLoading(false);
+				console.log(user, user);
+				navigate('/feed');
+			})
+			.catch((error) => {
+				const errorCode = error.code;
+				const errorMessage = error.message;
+				toast.error(errorCode);
+				setLoading(false);
+			});
+	};
+
+	const googleSignIn = () => {
+		const provider = new GoogleAuthProvider();
+		signInWithRedirect(auth, provider);
+	};
+
 	return (
 		<div>
 			<form onSubmit={handleSubmit(onsubmit)}>
@@ -45,16 +71,16 @@ const Login = () => {
 						<label htmlFor="password" className="block text-sm text-[#3B3B3B]">
 							Password
 						</label>
-						<input {...register('password')} type="text" className="c_input" />
+						<input {...register('password')} type="password" className="c_input" />
 						<p className="text-xs text-red-600">{errors?.password?.message?.toString()}</p>
 					</div>
 
 					<div className="mt-10">
-						<Button text="Log in"  />
+						<Button text="Log in" isLoading={loading} />
 					</div>
 				</div>
 			</form>
-			<div className="mt-5">
+			<div className="mt-5" onClick={googleSignIn}>
 				<Button image="/images/google_logo.svg" styles="bg-white border-[#D0D0D0]" text=" Sign in with google" />
 			</div>
 			{/* <div className="mt-5">
