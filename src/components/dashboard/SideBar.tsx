@@ -1,8 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { navItems } from '../../utils/nav';
 
 export const SideBar = ({ show, setShow }) => {
+	const location = useLocation();
 	return (
 		<>
 			<div className="absolute xl:relative w-64 h-screen overflow-y-auto shadow bg-[#FFFFFF] hidden xl:block">
@@ -14,6 +15,7 @@ export const SideBar = ({ show, setShow }) => {
 						{navItems.overview.map((item, i) => {
 							return (
 								<li
+									key={i}
 									className={`pl-6 cursor-pointer leading-4  focus:outline-none ${
 										item.header
 											? 'text-black font-bold mb-[22px] mt-[33px] uppercase cursor-default text-sm'
@@ -23,11 +25,17 @@ export const SideBar = ({ show, setShow }) => {
 									<div className="flex items-center gap-4">
 										{!item.header && (
 											<div>
-												<img src={item.icon} alt={item.title} />
+												<img
+													src={item.link && location.pathname.startsWith(item.link) ? item.iconActive : item.icon}
+													alt={item.title}
+												/>
 											</div>
 										)}
 										<div>
-											<Link to={item.link} className="">
+											<Link
+												to={item.link}
+												className={item.link && location.pathname.startsWith(item.link) ? 'text-primary' : ''}
+											>
 												{item.title}
 											</Link>
 										</div>
