@@ -22,7 +22,9 @@ const Testimonials = () => {
 						</p>
 
 						<div className="w-[130px]">
-							<Button text="Join Chatter" />
+							<Link to="/register">
+								<Button text="Join Chatter" />
+							</Link>
 						</div>
 					</div>
 				</div>
@@ -54,4 +56,3 @@ const Testimonials = () => {
 };
 
 export default Testimonials;
--2;
