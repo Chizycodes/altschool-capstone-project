@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import PublicRoutes from './routes/PublicRoutes';
 
 function App() {
 	return (
-		<>
+		<BrowserRouter>
 			<Routes>
 				<Route path="/*" element={<PublicRoutes />} />
 			</Routes>
-		</>
+		</BrowserRouter>
 	);
 }
 
