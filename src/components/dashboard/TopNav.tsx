@@ -63,7 +63,7 @@ export const TopNav = ({ show, setShow }) => {
 											{currentUser?.photoURL ? (
 												<img src={currentUser?.photoURL} alt="user" className="w-full h-full rounded-full" />
 											) : (
-												currentUser?.displayName?.split(' ')[0][0] + currentUser?.displayName?.split(' ')[1][0]
+												currentUser?.firstName?.charAt(0) + currentUser?.lastName?.charAt(0)
 											)}
 										</>
 									) : (
@@ -96,8 +96,10 @@ export const TopNav = ({ show, setShow }) => {
 										<li className="border-b border-[#e6e4e4]">
 											<div className="flex flex-row items-center gap-3">
 												<div className="flex flex-col items-start">
-													<h6 className="text-sm font-semibold">{currentUser?.displayName}</h6>
-													<p className="text-xs text-gray-600">{currentUser?.email}</p>
+													<h6 className="text-sm font-semibold">
+														{currentUser?.firstName + ' ' + currentUser?.lastName}
+													</h6>
+													<p className="text-xs text-gray-600">{currentUser?.emailAddress}</p>
 												</div>
 											</div>
 										</li>
@@ -149,7 +151,7 @@ export const TopNav = ({ show, setShow }) => {
 								) : (
 									<>
 										<div className="">
-											<p className='text-lg font-semibold text-center mb-3'>Sign up or Login to your Chatter account</p>
+											<p className="text-lg font-semibold text-center mb-3">Sign up or Login to your Chatter account</p>
 											<Link to="/login" className="">
 												<Button text="Log in" styles="bg-white w-full my-5" />
 											</Link>

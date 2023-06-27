@@ -2,13 +2,14 @@ import React from 'react';
 import Button from '../../components/general/Button';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../../firebase';
 
 const modules = {
 	toolbar: [
 		[{ header: [1, 2, 3, false] }],
-		['bold', 'italic', 'underline', 'strike', 'blockquote', 'code'],
+		['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block', "image"],
 		[{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
-		['link', 'image', 'video'],
 		['clean'],
 	],
 };
@@ -19,21 +20,23 @@ const formats = [
 	'underline',
 	'strike',
 	'blockquote',
-	'code',
+	'code-block',
 	'list',
 	'bullet',
 	'indent',
 	'link',
-	'image',
-	'video',
 ];
 
 const Draft = () => {
+	const [image, setImage] = React.useState<any>('');
 	const [value, setValue] = React.useState({
 		title: '',
-		cover: '',
 		post: '',
 	});
+	const uploadCover = async () => {
+		const name = new Date().getTime() + '-' + image.name;
+		const storageRef = ref(storage, name)
+	}
 	const handleChange = (value: any) => {
 		console.log(value);
 		setValue({ ...value, post: value });
@@ -66,8 +69,8 @@ const Draft = () => {
 						modules={modules}
 						formats={formats}
 						onChange={handleChange}
-            className='h-40 text-base'
-            theme='snow'
+						className="h-40 text-base"
+						theme="snow"
 					/>
 				</div>
 			</div>

@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { GoogleAuthProvider, signInWithRedirect, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { toast } from 'react-toastify';
-import {	 useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
+import { getUser } from '../../utils/requests';
 
 interface SchemaProps {
 	emailAddress: string;
@@ -26,6 +27,7 @@ const Login = () => {
 	const {
 		register,
 		handleSubmit,
+		reset,
 		formState: { errors },
 	} = useForm({ resolver: yupResolver(schema) });
 
@@ -34,10 +36,10 @@ const Login = () => {
 		const { emailAddress, password } = data;
 		signInWithEmailAndPassword(auth, emailAddress, password)
 			.then((userCredential) => {
-				const user = userCredential.user;
+				const user = getUser(userCredential?.user?.uid);
 				dispatch({ type: 'LOGIN', payload: user });
+				reset();
 				setLoading(false);
-				console.log(user, user);
 				navigate('/feed');
 			})
 			.catch((error) => {
@@ -76,12 +78,17 @@ const Login = () => {
 					</div>
 
 					<div className="mt-10">
-						<Button text="Log in" isLoading={loading} />
+						<Button text="Log in" isLoading={loading} isDisabled={loading} />
 					</div>
 				</div>
 			</form>
 			<div className="mt-5" onClick={googleSignIn}>
-				<Button image="/images/google_logo.svg" styles="bg-white border-[#D0D0D0]" text=" Sign in with google" />
+				<Button
+					image="/images/google_logo.svg"
+					styles="bg-white border-[#D0D0D0]"
+					text=" Sign in with google"
+					isDisabled={loading}
+				/>
 			</div>
 			{/* <div className="mt-5">
 				<Button image="/images/linkedin_logo.svg" styles="bg-white border-[#D0D0D0]" text="Sign up with Linkedin" />

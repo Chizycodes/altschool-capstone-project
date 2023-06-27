@@ -19,19 +19,18 @@ const AppRoutes = () => {
 
 			{currentUser ? (
 				<>
-					<Route path="*" element={<Navigate to="feed" />} />
+					<Route path="login" element={<Navigate to="/feed" />} />
 					<Route element={<Dashboardlayout />}>
 						<Route path="draft" element={<Draft />} />
 					</Route>
 				</>
 			) : (
 				<>
-					<Route path="*" element={<Navigate to="login" />} />
+					<Route path="draft" element={<Navigate to="/login" />} />
 					<Route path="login" element={<Auth />} />
-					<Route path="register" element={<Auth />} />
 				</>
 			)}
-
+			<Route path="register" element={<Auth />} />
 			<Route path="*" element={<Error404 />} />
 		</Routes>
 	);

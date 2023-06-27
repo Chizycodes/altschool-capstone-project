@@ -1,7 +1,8 @@
 import React, { useContext, createContext, useEffect, useReducer } from 'react';
 import { GoogleAuthProvider, signInWithRedirect, signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase';
-import { UserModel } from '../utils/models';
+import { auth, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { getUser } from '../utils/requests';
 
 const INITIAL_STATE = {
 	currentUser: null,
@@ -13,10 +14,26 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthContextProvider = ({ children }) => {
 	const [state, dispatch] = useReducer(AuthReducer, INITIAL_STATE);
 
+	// const getUser = async (id: string) => {
+	// 	const docRef = doc(db, 'users', id);
+	// 	const docSnap = await getDoc(docRef);
+	// 	if (docSnap.exists()) {
+	// 		console.log('Document data:', docSnap.data());
+	// 		dispatch({ type: 'LOGIN', payload: docSnap.data() });
+	// 	} else {
+	// 		// doc.data() will be undefined in this case
+	// 		console.log('No such document!');
+	// 	}
+	// };
+
 	useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-			dispatch({ type: 'LOGIN', payload: currentUser });
-			console.log(currentUser, 'user');
+		const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+			if (currentUser) {
+				const user = await getUser(currentUser.uid);
+				dispatch({ type: 'LOGIN', payload: user });
+			} else {
+				dispatch({ type: 'LOGOUT' });
+			}
 		});
 		return () => {
 			unsubscribe();
@@ -27,7 +44,7 @@ export const AuthContextProvider = ({ children }) => {
 };
 
 // AuthReducer
-const AuthReducer = (state, action) => {
+const AuthReducer = (state: any, action: any) => {
 	switch (action.type) {
 		case 'LOGIN':
 			return { ...state, currentUser: action.payload };
