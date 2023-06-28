@@ -43,7 +43,6 @@ const Register = () => {
 				username,
 				dateCreated: serverTimestamp(),
 			});
-			console.log('user', user);
 			reset();
 			setLoading(false);
 			toast.success('Account created successfully');

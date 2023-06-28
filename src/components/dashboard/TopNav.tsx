@@ -5,7 +5,6 @@ import Button from '../general/Button';
 
 export const TopNav = ({ show, setShow }) => {
 	const { dispatch, currentUser } = useAuth();
-	console.log(currentUser, 'user-top');
 	return (
 		<nav className="h-[78px] flex items-center justify-between bg-[#ffffff] shadow relative z-10 pl-6">
 			<div className="flex items-center gap-2">
