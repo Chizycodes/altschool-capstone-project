@@ -101,14 +101,16 @@ const Draft = () => {
 					toast.success('Post published successfully');
 					setLoading(false);
 					console.log('Document written with ID: ', docRef);
-					navigate(`/feed/${docRef.id}`);
+					const title = postContent?.title?.toLowerCase().replace(/\s+/g, '-');
+					navigate(`/feed/${title}/${docRef.id}`);
 				});
 			}
 			if (location.pathname.includes(`/edit/${id}`)) {
 				await setDoc(doc(db, 'posts', `${id}`), post).then(async () => {
 					toast.success('Post updated successfully');
 					setLoading(false);
-					// navigate(`/feed/${docRef.id}`);
+					const title = postContent?.title?.toLowerCase().replace(/\s+/g, '-');
+					navigate(`/feed/${title}/${id}`);
 				});
 			}
 		} catch (error) {

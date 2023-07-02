@@ -16,6 +16,7 @@ const AppRoutes = () => {
 			<Route index element={<Home />} />
 			<Route element={<Dashboardlayout />}>
 				<Route path="feed" element={<Feed />} />
+				<Route path="feed/:title/:id" element={<Feed />} />
 			</Route>
 			<Route path="login" element={currentUser ? <Navigate to="/feed" /> : <Auth />} />
 			<Route path="/*" element={<PrivateRoutes />} />
