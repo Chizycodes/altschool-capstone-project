@@ -10,6 +10,7 @@ import {
 	DocumentReference,
 	addDoc,
 	collection,
+	deleteDoc,
 	doc,
 	getDoc,
 	onSnapshot,
@@ -62,7 +63,6 @@ const Draft = () => {
 	const [drafts, setDrafts] = useState([]);
 	const [published, setPublished] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const location = useLocation();
 	const data = {
 		...postContent,
 		coverImage: imageUrl,
@@ -220,6 +220,16 @@ const Draft = () => {
 		};
 	}, []);
 
+	// Delete Draft
+	const deleteDraft = async (id: string) => {
+		try {
+			await deleteDoc(doc(db, 'drafts', `${id}`));
+			toast.success('Draft deleted');
+		} catch (error) {
+			toast.error(error.code);
+		}
+	};
+
 	return (
 		<div className="w-full bg-white p-5 md:px-20 mx-auto min-h-screen">
 			{loadNewDraft ? (
@@ -229,7 +239,7 @@ const Draft = () => {
 					</div>
 				</>
 			) : (
-				<DraftDrawer drafts={drafts}>
+				<DraftDrawer drafts={drafts} deleteDraft={deleteDraft}>
 					<div className="mb-20 relative">
 						{savingDraft && (
 							<div className="absolute">

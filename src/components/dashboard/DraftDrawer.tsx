@@ -1,35 +1,9 @@
-import { collection, getDocs, onSnapshot } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
-import { db } from '../../firebase';
-import { toast } from 'react-toastify';
-import { Link, useParams, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
-const DraftDrawer = ({ children, drafts }) => {
-	// const [drafts, setDrafts] = useState([]);
-  // const [published, setPublished] = useState([]);
-	// const [isLoading, setIsLoading] = useState(true);
-	// const { id } = useParams<{ id: string }>();
-	// const location = useLocation();
-
-	// console.log(drafts, 'drafts');
-	// useEffect(() => {
-	// 	const unsub = onSnapshot(
-	// 		collection(db, 'drafts'),
-	// 		(snapshot) => {
-	// 			const list: any = [];
-	// 			snapshot.docs.forEach((doc) => {
-	// 				list.push({ id: doc.id, ...doc.data() });
-	// 			});
-	// 			setDrafts(list);
-	// 		},
-	// 		(error) => {
-	// 			toast.error(error.code);
-	// 		}
-	// 	);
-	// 	return () => {
-	// 		unsub();
-	// 	};
-	// }, []);
+const DraftDrawer = ({ children, drafts, deleteDraft }) => {
+	const location = useLocation();
+	// const [showMore, setShowMore] = useState(false);
 	return (
 		<div className="drawer drawer-end">
 			<input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
@@ -42,15 +16,33 @@ const DraftDrawer = ({ children, drafts }) => {
 				<div className="menu p-4 pt-10 w-80 h-full bg-white text-base-content">
 					<h2 className="mb-3 font-semibold text-xl">My Drafts</h2>
 					<ul>
-						{drafts.map((draft: any) => {
+						{drafts?.map((draft: any) => {
 							return (
 								<li
 									key={draft?.id}
-									className={`text-[#65717C] hover:text-[#5444F2] text-base cursor-pointer rounded-md ${
+									className={`text-[#65717C] text-base cursor-pointer rounded-md flex flex-row items-center justify-between ${
 										location.pathname == `/draft/${draft?.id}` ? 'bg-[#545a603a]' : ''
 									}`}
 								>
-									<Link to={`/draft/${draft?.id}`}>{draft?.title}</Link>
+									<Link className="hover:text-[#5444F2]" to={`/draft/${draft?.id}`}>
+										{draft?.title}
+									</Link>
+
+									<div className="dropdown dropdown-end">
+										<label tabIndex={0} className="w-8 h-8 cursor-pointer">
+											<img src="/images/more_icon.svg" alt="more" className="" />
+										</label>
+										<ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-white rounded-box w-32">
+											<li>
+												<span className="hover:text-[#5444F2]" onClick={() => deleteDraft(draft?.id)}>
+													Delete
+												</span>
+											</li>
+											<li>
+												<span className="hover:text-[#5444F2]">Copy link</span>
+											</li>
+										</ul>
+									</div>
 								</li>
 							);
 						})}
