@@ -1,33 +1,14 @@
 import dayjs from 'dayjs';
-import moment from 'moment';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { getDate, getReadTime, parseContent } from '../../utils/requests';
 
 const Post = ({ post }) => {
-	const getDate = (timestamp: any) => {
-		const date = new Date(timestamp.seconds * 1000);
-		const formattedDate = dayjs(date).format('D MMMM, YYYY');
-		return formattedDate;
-	};
-
-	const getReadTime = (content: string) => {
-		const wordsPerMinute = 200;
-		const numberOfWords = content.split(/\s/g).length;
-		const readTime = Math.ceil(numberOfWords / wordsPerMinute);
-		return readTime;
-	};
-
-	const parseContent = (content: string) => {
-		const parser = new DOMParser();
-		const htmlDocument = parser.parseFromString(content, 'text/html');
-		const textContent = htmlDocument.documentElement.textContent;
-		return textContent;
-	};
 	return (
 		<div className="card card-body border border-light_gray shadow-sm mb-5">
 			<div>
 				<div className="flex flex-row items-center gap-3">
-					<div className="w-[50px] h-[50px] text-[#fff] bg-primary rounded-full flex items-center justify-center text-base overflow-hidden">
+					<div className="w-[30px] h-[30px] text-[#fff] bg-primary rounded-full flex items-center justify-center text-sm overflow-hidden">
 						{
 							<>
 								{post?.author?.photoURL ? (
@@ -39,26 +20,31 @@ const Post = ({ post }) => {
 						}
 						{/* <img src="/images/person.svg" className="w-full h-full" alt="user" /> */}
 					</div>
-					<div className="flex flex-col gap-2 items-start">
-						<h6 className="text-lg font-semibold">{post?.author?.firstName + ' ' + post?.author?.lastName}</h6>
-						<p className="text-sm text-gray-600">{getDate(post?.timestamp)}</p>
+					<div className="flex flex-col">
+						<span className="text-base font-semibold">{post?.author?.firstName + ' ' + post?.author?.lastName}</span>
+
+						<span className="text-xs text-gray-600">{getDate(post?.timestamp)}</span>
 					</div>
 				</div>
 
-				<Link to="/post">
-					<h2 className="text-2xl mt-3 font-bold cursor-pointer">{post?.title}</h2>
-				</Link>
+				<div className="flex">
+					<div className="w-[80%]">
+						<Link to={`feed/${post?.title}/${post?.id}`}>
+							<h2 className="text-xl mt-3 font-bold cursor-pointer hover:text-primary">{post?.title}</h2>
+						</Link>
 
-				<span className="text-gray text-xs flex gap-2 mt-2">
-					<img src="/images/book-icon.svg" alt="book icon" /> <p>{getReadTime(post?.body)} mins read</p>
-				</span>
+						<p className="text-gray text-sm mt-2">{parseContent(post?.body)}</p>
+					</div>
 
-				<p className="text-gray text-sm mt-4">{parseContent(post?.body)}</p>
-
-				<div className="w-full h-[242px] mt-4 rounded-lg overflow-hidden">
-					<img src={post?.coverImage} alt="post image" className="w-full h-full" />
+					<div className="w-[20%] h-[120px] mt-4 rounded-lg overflow-hidden">
+						<img src={post?.coverImage} alt="post image" className="w-full h-full" />
+					</div>
 				</div>
-				<div className="w-full flex gap-4 mt-3 justify-center">
+				<div className="w-full flex gap-5 mt-3 justify-center">
+					<div className="text-gray text-xs flex gap-2">
+						<img src="/images/book-icon.svg" alt="book icon" />{' '}
+						<span className="w-full">{getReadTime(post?.body)} mins read</span>
+					</div>
 					<div className="flex gap-2 items-center">
 						<img className="cursor-pointer" src="/images/comment-icon.svg" alt="comment" />
 						<span className="text-gray text-xs">{post?.commentsCount}</span>
