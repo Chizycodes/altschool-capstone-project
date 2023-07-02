@@ -15,20 +15,29 @@ const Post = ({ post }) => {
 		const numberOfWords = content.split(/\s/g).length;
 		const readTime = Math.ceil(numberOfWords / wordsPerMinute);
 		return readTime;
-	}
+	};
 
 	const parseContent = (content: string) => {
 		const parser = new DOMParser();
 		const htmlDocument = parser.parseFromString(content, 'text/html');
 		const textContent = htmlDocument.documentElement.textContent;
 		return textContent;
-	}
+	};
 	return (
 		<div className="card card-body border border-light_gray shadow-sm mb-5">
 			<div>
 				<div className="flex flex-row items-center gap-3">
-					<div className="w-[70px] h-[70px] text-[#fff] bg-primary rounded-full flex items-center justify-center text-base overflow-hidden">
-						<img src="/images/person.svg" className="w-full h-full" alt="user" />
+					<div className="w-[50px] h-[50px] text-[#fff] bg-primary rounded-full flex items-center justify-center text-base overflow-hidden">
+						{
+							<>
+								{post?.author?.photoURL ? (
+									<img src={post?.author?.photoURL} alt="user" className="w-full h-full rounded-full" />
+								) : (
+									post?.author?.firstName?.charAt(0) + post?.author?.lastName?.charAt(0)
+								)}
+							</>
+						}
+						{/* <img src="/images/person.svg" className="w-full h-full" alt="user" /> */}
 					</div>
 					<div className="flex flex-col gap-2 items-start">
 						<h6 className="text-lg font-semibold">{post?.author?.firstName + ' ' + post?.author?.lastName}</h6>
@@ -44,9 +53,7 @@ const Post = ({ post }) => {
 					<img src="/images/book-icon.svg" alt="book icon" /> <p>{getReadTime(post?.body)} mins read</p>
 				</span>
 
-				<p className="text-gray text-sm mt-4">
-					{parseContent(post?.body)}
-				</p>
+				<p className="text-gray text-sm mt-4">{parseContent(post?.body)}</p>
 
 				<div className="w-full h-[242px] mt-4 rounded-lg overflow-hidden">
 					<img src={post?.coverImage} alt="post image" className="w-full h-full" />
