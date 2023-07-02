@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Button from '../../components/general/Button';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '../../firebase';
 import { toast } from 'react-toastify';
 import {
@@ -24,6 +24,7 @@ import SpinLoader from '../../components/general/SpinLoader';
 import DraftDrawer from '../../components/dashboard/DraftDrawer';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import { set } from 'mongoose';
 
 const modules = {
 	toolbar: [
@@ -49,16 +50,12 @@ const formats = [
 
 const Draft = () => {
 	const id = useParams()?.id;
-	console.log(id, 'id');
 	const navigate = useNavigate();
 	const [loadImage, setLoadImage] = useState(false);
 	const [loadNewDraft, setLoadNewDraft] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [savingDraft, setSavingDraft] = useState(false);
-	const [image, setImage] = useState<any>('');
-	const [imageUrl, setImageUrl] = useState<any>('');
-	// const [draftId, setDraftId] = useState<any>(id);
-	const [timerId, setTimerId] = useState<any>(null);
+	const [imageUrl, setImageUrl] = useState<string>('');
 	const [postContent, setPostContent] = useState({
 		title: '',
 		body: '',
@@ -69,23 +66,32 @@ const Draft = () => {
 	const [drafts, setDrafts] = useState([]);
 	const [published, setPublished] = useState([]);
 
-	const data = {
-		...postContent,
-		coverImage: imageUrl,
-		author: {
-			id: currentUser?.id,
-			firstName: currentUser?.firstName,
-			lastName: currentUser?.lastName,
-		},
-		dateCreated: serverTimestamp(),
-	};
+	// const data = {
+	// 	...postContent,
+	// 	coverImage: imageUrl,
+	// 	author: {
+	// 		id: currentUser?.id,
+	// 		firstName: currentUser?.firstName,
+	// 		lastName: currentUser?.lastName,
+	// 	},
+	// 	timestamp: serverTimestamp(),
+	// };
 
 	// Handle publish post
 	const publishPost = async () => {
 		setLoading(true);
+		const data = {
+			...postContent,
+			coverImage: imageUrl,
+			author: {
+				id: currentUser?.id,
+				firstName: currentUser?.firstName,
+				lastName: currentUser?.lastName,
+			},
+			timestamp: serverTimestamp(),
+		};
 		try {
 			const post = await addDoc(collection(db, 'posts'), data);
-			console.log(post.id, 'draft');
 			await deleteDoc(doc(db, 'drafts', `${id}`));
 			toast.success('Post published successfully');
 			setLoading(false);
@@ -100,56 +106,47 @@ const Draft = () => {
 		setLoadImage(true);
 		const file = e.target.files[0];
 		if (!file) {
+			setLoadImage(false);
 			return;
 		}
-		setImage(file);
+		handleImageUpload(file);
+	};
+	const handleImageUpload = async (file: any) => {
+		const name = new Date().getTime() + file?.name;
+		const storageRef = ref(storage, name);
+		const uploadTask = uploadBytesResumable(storageRef, file);
+		uploadTask.on(
+			'state_changed',
+			(snapshot) => {
+				switch (snapshot.state) {
+					case 'paused':
+						toast.info('Upload is paused');
+						break;
+					case 'running':
+						setLoadImage(true);
+						break;
+					default:
+						break;
+				}
+			},
+			(error) => {
+				// Handle unsuccessful uploads
+				const errorCode = error.code;
+				toast.error(errorCode);
+				setLoadImage(false);
+			},
+			() => {
+				// Handle successful uploads on complete
+				getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+					console.log('File available at', downloadURL);
+					setImageUrl(downloadURL);
+					setLoadImage(false);
+				});
+			}
+		);
 	};
 
-	// Image Upload to Firebase Storage
-	useEffect(() => {
-		const uploadCoverImage = async (file: any) => {
-			const name = new Date().getTime() + image?.name;
-			const storageRef = ref(storage, name);
-			console.log(storageRef, 'storageRef');
-			const uploadTask = uploadBytesResumable(storageRef, file);
-			uploadTask.on(
-				'state_changed',
-				(snapshot) => {
-					switch (snapshot.state) {
-						case 'paused':
-							toast.info('Upload is paused');
-							break;
-						case 'running':
-							setLoadImage(true);
-							break;
-						default:
-							break;
-					}
-				},
-				(error) => {
-					// Handle unsuccessful uploads
-					const errorCode = error.code;
-					toast.error(errorCode);
-					setLoadImage(false);
-				},
-				() => {
-					// Handle successful uploads on complete
-					setLoadImage(false);
-					getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-						console.log('File available at', downloadURL);
-						setImageUrl(downloadURL);
-					});
-					saveDraft();
-				}
-			);
-		};
-		if (image) {
-			uploadCoverImage(image);
-		}
-	}, [image]);
-
 	// Get Draft or Create New Draft
-
 	const getDraft = async (id: string) => {
 		const docRef = doc(db, 'drafts', `${id}`);
 		const docSnap = await getDoc(docRef);
@@ -159,16 +156,24 @@ const Draft = () => {
 			setPostContent({ title, body });
 			setImageUrl(coverImage);
 		} else {
-			console.log('No such document!');
 			navigate('/draft');
 		}
 	};
 
 	const createNewDraft = async () => {
 		setLoadNewDraft(true);
+		const data = {
+			...postContent,
+			coverImage: imageUrl,
+			author: {
+				id: currentUser?.id,
+				firstName: currentUser?.firstName,
+				lastName: currentUser?.lastName,
+			},
+			timestamp: serverTimestamp(),
+		};
 		try {
 			const draft = await addDoc(collection(db, 'drafts'), data);
-			console.log(draft.id, 'draft');
 			navigate(`/draft/${draft.id}`);
 			setLoadNewDraft(false);
 		} catch (error) {
@@ -222,12 +227,34 @@ const Draft = () => {
 		}
 	};
 
+	// Delete Image
+	const deleteImage = async () => {
+		const desertRef = ref(storage, `${imageUrl}`);
+		deleteObject(desertRef)
+			.then(() => {
+				setImageUrl('');
+				saveDraft();
+			})
+			.catch((error) => {
+				toast.error(error.code);
+			});
+	};
+
 	// Save draft every 5 seconds
 	const saveDraft = async () => {
 		setSavingDraft(true);
+		const data = {
+			...postContent,
+			coverImage: imageUrl,
+			author: {
+				id: currentUser?.id,
+				firstName: currentUser?.firstName,
+				lastName: currentUser?.lastName,
+			},
+			timestamp: serverTimestamp(),
+		};
 		try {
-			const draft = await setDoc(doc(db, 'drafts', `${id}`), data);
-			console.log(draft, 'draft');
+			await setDoc(doc(db, 'drafts', `${id}`), data);
 			setSavingDraft(false);
 			setIsSaved(true);
 			setTimeout(() => {
@@ -239,41 +266,26 @@ const Draft = () => {
 			toast.error(errorCode);
 		}
 	};
-	useEffect(() => {
-		return () => {
-			clearTimeout(timerId);
-		};
-	}, [timerId]);
 
 	const handleTitleChange = (e: any) => {
+		console.log(e.target.value);
 		setPostContent({ ...postContent, title: e.target.value });
-
-		clearTimeout(timerId);
-
-		// Set a new timer to save the input text after 10 seconds
-
-		const newTimerId = setTimeout(() => {
-			if (postContent?.title.trim() !== '') {
-				saveDraft();
-			}
-		}, 7000);
-		setTimerId(newTimerId);
 	};
 
 	const handleBodyChange = (value: string) => {
 		setPostContent({ ...postContent, body: value });
+	};
 
-		clearTimeout(timerId);
-
-		// Set a new timer to save the input text after 10 seconds
-
+	useEffect(() => {
 		const newTimerId = setTimeout(() => {
-			if (postContent?.body.trim() !== '') {
+			if (postContent?.body || postContent?.title || imageUrl) {
 				saveDraft();
 			}
 		}, 7000);
-		setTimerId(newTimerId);
-	};
+		return () => {
+			clearTimeout(newTimerId);
+		};
+	}, [imageUrl, postContent?.body, postContent?.title]);
 
 	return (
 		<div className="w-full bg-white p-5 md:px-20 mx-auto min-h-screen">
@@ -308,16 +320,16 @@ const Draft = () => {
 								</svg>
 							</label>
 							{(savingDraft || isSaved) && (
-								<div className="fixed bg-white top-[100px] right-6 shadow-md rounded-md p-1">
-									{!savingDraft && (
-										<p className="text-green-500 flex items-center gap-2 ">
+								<div className="fixed bg-white top-[100px] right-6 shadow-md rounded-sm p-1 z-[1000]">
+									{savingDraft && (
+										<span className="text-green-500 flex items-center gap-2 ">
 											Saving draft <SpinLoader />
-										</p>
+										</span>
 									)}
 									{isSaved && (
-										<p className="text-green-500 flex items-center gap-2 ">
+										<span className="text-green-500 flex items-center gap-2 ">
 											Saved <CheckOutlined className="text-green-500" />
-										</p>
+										</span>
 									)}
 								</div>
 							)}
@@ -331,18 +343,22 @@ const Draft = () => {
 							</div>
 						</div>
 						<div className="flex gap-3 mb-3 font">
-							<div onClick={() => inputRef.current?.click()}>
-								<Button
-									styles={`bg-none hover:bg-[#543ee093] font-normal text-base border-none ${
-										loadImage ? 'cursor-not-allowed' : 'cursor-pointer'
-									}}`}
-									image="/images/image-icon.svg"
-									text={loadImage ? 'Uploading...' : 'Add Cover'}
-									isDisabled={loadImage}
-								/>
-							</div>
-
+							{!imageUrl && (
+								<>
+									<div onClick={() => inputRef.current?.click()}>
+										<Button
+											styles={`bg-none hover:bg-[#543ee093] font-normal text-base border-none ${
+												loadImage ? 'cursor-not-allowed' : 'cursor-pointer'
+											}}`}
+											image="/images/image-icon.svg"
+											text={loadImage ? 'Uploading...' : 'Add Cover'}
+											isDisabled={loadImage}
+										/>
+									</div>
+								</>
+							)}
 							<input ref={inputRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
+
 							{/* <span>Add Subtitle</span> */}
 						</div>
 						<div>
@@ -350,12 +366,15 @@ const Draft = () => {
 								placeholder="Title..."
 								className="w-full border-none rounded-lg mt-3 font-bold text-4xl outline-none focus:border-none hove:border-none scroll-m-0"
 								value={postContent?.title}
-								onChange={handleTitleChange}
+								onChange={(e) => handleTitleChange(e)}
 							/>
 							{imageUrl && (
 								<div className="h-[20rem] w-full rounded-lg overflow-hidden mb-10 relative">
 									<img src={imageUrl} alt="cover image" className="w-full h-full" />
-									<div className="absolute bg-gray right-2 top-2 w-8 h-8 rounded-md flex items-center justify-center">
+									<div
+										className="absolute bg-gray right-2 top-2 w-8 h-8 rounded-md flex items-center justify-center cursor-pointer"
+										onClick={deleteImage}
+									>
 										<CloseOutlined />
 									</div>
 								</div>
