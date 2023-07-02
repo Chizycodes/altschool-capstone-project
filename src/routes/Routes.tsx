@@ -7,6 +7,7 @@ import Dashboardlayout from '../components/dashboard/DashboardLayout';
 import Feed from '../pages/Dashboard/Feed';
 import Draft from '../pages/Dashboard/Draft';
 import { useAuth } from '../context/AuthContext';
+import PrivateRoutes from './PrivateRoutes';
 
 const AppRoutes = () => {
 	const { currentUser } = useAuth();
@@ -16,21 +17,8 @@ const AppRoutes = () => {
 			<Route element={<Dashboardlayout />}>
 				<Route path="feed" element={<Feed />} />
 			</Route>
-
-			{currentUser ? (
-				<>
-					<Route path="login" element={<Navigate to="/feed" />} />
-					<Route element={<Dashboardlayout />}>
-						<Route path="draft" element={<Draft />} />
-						<Route path="draft/:id" element={<Draft />} />
-					</Route>
-				</>
-			) : (
-				<>
-					<Route path="draft*" element={<Navigate to="/login" />} />
-					<Route path="login" element={<Auth />} />
-				</>
-			)}
+			<Route path="login" element={currentUser ? <Navigate to="/feed" /> : <Auth />} />
+			<Route path="/*" element={<PrivateRoutes />} />
 			<Route path="register" element={<Auth />} />
 			<Route path="*" element={<Error404 />} />
 		</Routes>

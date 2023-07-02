@@ -6,8 +6,6 @@ import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebas
 import { db, storage } from '../../firebase';
 import { toast } from 'react-toastify';
 import {
-	DocumentData,
-	DocumentReference,
 	addDoc,
 	collection,
 	deleteDoc,
@@ -24,7 +22,6 @@ import SpinLoader from '../../components/general/SpinLoader';
 import DraftDrawer from '../../components/dashboard/DraftDrawer';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { set } from 'mongoose';
 
 const modules = {
 	toolbar: [
@@ -50,6 +47,7 @@ const formats = [
 
 const Draft = () => {
 	const id = useParams()?.id;
+	const location = useLocation();
 	const navigate = useNavigate();
 	const [loadImage, setLoadImage] = useState(false);
 	const [loadNewDraft, setLoadNewDraft] = useState(false);
@@ -66,35 +64,43 @@ const Draft = () => {
 	const [drafts, setDrafts] = useState([]);
 	const [published, setPublished] = useState([]);
 
-	// const data = {
-	// 	...postContent,
-	// 	coverImage: imageUrl,
-	// 	author: {
-	// 		id: currentUser?.id,
-	// 		firstName: currentUser?.firstName,
-	// 		lastName: currentUser?.lastName,
-	// 	},
-	// 	timestamp: serverTimestamp(),
-	// };
+	const data = {
+		...postContent,
+		coverImage: imageUrl,
+		author: {
+			id: currentUser?.id,
+			firstName: currentUser?.firstName,
+			lastName: currentUser?.lastName,
+		},
+		timestamp: serverTimestamp(),
+	};
 
 	// Handle publish post
 	const publishPost = async () => {
+		if (!postContent?.title) {
+			toast.error('Please add a title to your post');
+			return;
+		} else if (!postContent?.body) {
+			toast.error('Please add a body to your post');
+			return;
+		} else if (!imageUrl) {
+			toast.error('Please add a cover image to your post');
+			return;
+		}
 		setLoading(true);
-		const data = {
-			...postContent,
-			coverImage: imageUrl,
-			author: {
-				id: currentUser?.id,
-				firstName: currentUser?.firstName,
-				lastName: currentUser?.lastName,
-			},
-			timestamp: serverTimestamp(),
+		const post = {
+			...data,
+			likesCount: 0,
+			commentsCount: 0,
 		};
 		try {
-			const post = await addDoc(collection(db, 'posts'), data);
-			await deleteDoc(doc(db, 'drafts', `${id}`));
-			toast.success('Post published successfully');
-			setLoading(false);
+			await addDoc(collection(db, 'posts'), data).then(async (docRef) => {
+				await deleteDoc(doc(db, 'drafts', `${id}`));
+				toast.success('Post published successfully');
+				setLoading(false);
+				console.log('Document written with ID: ', docRef);
+				navigate(`/feed/${docRef.id}`);
+			});
 		} catch (error) {
 			toast.error(error.code);
 			setLoading(false);
@@ -147,31 +153,37 @@ const Draft = () => {
 	};
 
 	// Get Draft or Create New Draft
-	const getDraft = async (id: string) => {
-		const docRef = doc(db, 'drafts', `${id}`);
-		const docSnap = await getDoc(docRef);
-
-		if (docSnap.exists()) {
-			const { title, body, coverImage } = docSnap.data();
-			setPostContent({ title, body });
-			setImageUrl(coverImage);
-		} else {
-			navigate('/draft');
+	const getContent = async (collection: any) => {
+		setLoadNewDraft(true);
+		try {
+			const docRef = doc(db, collection, `${id}`);
+			const docSnap: any = await getDoc(docRef);
+			if (docSnap.exists()) {
+				const { title, body, coverImage } = docSnap.data();
+				setPostContent({ title, body });
+				setImageUrl(coverImage);
+			} else {
+				createNewDraft();
+			}
+			setLoadNewDraft(false);
+		} catch (error) {
+			const errorCode = error.code;
+			toast.error(errorCode);
+			setLoadNewDraft(false);
 		}
 	};
-
+	useEffect(() => {
+		if(id){
+			if (location.pathname.includes(`/draft/${id}`)) {
+				getContent('drafts');
+			}
+			if (location.pathname.includes(`/edit/${id}`)) {
+				getContent('posts');
+			} 
+		}
+	}, [id, location.pathname]);
 	const createNewDraft = async () => {
 		setLoadNewDraft(true);
-		const data = {
-			...postContent,
-			coverImage: imageUrl,
-			author: {
-				id: currentUser?.id,
-				firstName: currentUser?.firstName,
-				lastName: currentUser?.lastName,
-			},
-			timestamp: serverTimestamp(),
-		};
 		try {
 			const draft = await addDoc(collection(db, 'drafts'), data);
 			navigate(`/draft/${draft.id}`);
@@ -183,26 +195,24 @@ const Draft = () => {
 		}
 	};
 
-	// Get Draft List
+	// Get Draft and post List
 	useEffect(() => {
-		const q = query(collection(db, 'drafts'), where('author.id', '==', currentUser?.id));
-		const unsub = onSnapshot(
-			q,
-			(snapshot) => {
-				const list: any = [];
-				snapshot.docs.forEach((doc) => {
-					list.push({ id: doc.id, ...doc.data() });
-				});
-				setDrafts(list);
+		const draftQuery = query(collection(db, 'drafts'), where('author.id', '==', currentUser?.id));
 
-				// Set first draft id in url
-				if (list?.length > 0) {
-					const { title, body, coverImage, id } = list[0];
+		// Fetch drafts with matching author ID
+		const draftUnsub = onSnapshot(
+			draftQuery,
+			(snapshot) => {
+				const draftList: any = [];
+				snapshot.docs.forEach((doc) => {
+					draftList?.push({ id: doc.id, ...doc.data() });
+				});
+				setDrafts(draftList);
+
+				if (draftList?.length > 0) {
+					const { id } = draftList[0];
 					navigate(`/draft/${id}`);
-					setPostContent({ title, body });
-					setImageUrl(coverImage);
 				} else {
-					navigate('/draft');
 					createNewDraft();
 				}
 			},
@@ -210,18 +220,29 @@ const Draft = () => {
 				toast.error(error.code);
 			}
 		);
+
+		// Fetch posts with matching author ID
+		const postQuery = query(collection(db, 'posts'), where('author.id', '==', currentUser?.id));
+		const postUnsub = onSnapshot(postQuery, (snapshot) => {
+			const postList: any = [];
+			snapshot.docs.forEach((doc) => {
+				postList.push({ id: doc.id, ...doc.data() });
+			});
+			setPublished(postList);
+		});
 		return () => {
-			unsub();
+			draftUnsub();
+			postUnsub();
 		};
 	}, []);
 
 	// Delete Draft
-	const deleteDraft = async (id: string) => {
+	const deleteContent = async (collection: string, id: string) => {
 		try {
-			const confirmed = confirm('Are you sure you want to delete this draft?');
+			const confirmed = confirm('Are you sure you want to delete this item?');
 			if (!confirmed) return;
-			await deleteDoc(doc(db, 'drafts', `${id}`));
-			toast.success('Draft deleted');
+			await deleteDoc(doc(db, collection, `${id}`));
+			toast.success('Content deleted');
 		} catch (error) {
 			toast.error(error.code);
 		}
@@ -233,7 +254,6 @@ const Draft = () => {
 		deleteObject(desertRef)
 			.then(() => {
 				setImageUrl('');
-				saveDraft();
 			})
 			.catch((error) => {
 				toast.error(error.code);
@@ -243,16 +263,6 @@ const Draft = () => {
 	// Save draft every 5 seconds
 	const saveDraft = async () => {
 		setSavingDraft(true);
-		const data = {
-			...postContent,
-			coverImage: imageUrl,
-			author: {
-				id: currentUser?.id,
-				firstName: currentUser?.firstName,
-				lastName: currentUser?.lastName,
-			},
-			timestamp: serverTimestamp(),
-		};
 		try {
 			await setDoc(doc(db, 'drafts', `${id}`), data);
 			setSavingDraft(false);
@@ -277,11 +287,14 @@ const Draft = () => {
 	};
 
 	useEffect(() => {
-		const newTimerId = setTimeout(() => {
-			if (postContent?.body || postContent?.title || imageUrl) {
-				saveDraft();
-			}
-		}, 7000);
+		let newTimerId: any;
+		if(location.pathname.includes(`/draft`)){
+			newTimerId = setTimeout(() => {
+				if (postContent?.body || postContent?.title || imageUrl) {
+					saveDraft();
+				}
+			}, 7000);
+		}
 		return () => {
 			clearTimeout(newTimerId);
 		};
@@ -296,7 +309,7 @@ const Draft = () => {
 					</div>
 				</>
 			) : (
-				<DraftDrawer drafts={drafts} deleteDraft={deleteDraft}>
+				<DraftDrawer drafts={drafts} deleteContent={deleteContent} posts={published} createNewDraft={createNewDraft}>
 					<div className="mb-20 relative">
 						<div className="flex gap-3 justify-between w-full mb-5">
 							<label htmlFor="my-drawer-4" className="drawer-button">
@@ -338,7 +351,7 @@ const Draft = () => {
 									<Button text="Preview" styles="bg-white" />
 								</div>
 								<div onClick={publishPost}>
-									<Button text="Publish" isDisabled={loading} />
+									<Button text={location.pathname.includes('/draft') ? 'Publish' : 'Update'} isDisabled={loading} />
 								</div>
 							</div>
 						</div>
@@ -362,14 +375,8 @@ const Draft = () => {
 							{/* <span>Add Subtitle</span> */}
 						</div>
 						<div>
-							<textarea
-								placeholder="Title..."
-								className="w-full border-none rounded-lg mt-3 font-bold text-4xl outline-none focus:border-none hove:border-none scroll-m-0"
-								value={postContent?.title}
-								onChange={(e) => handleTitleChange(e)}
-							/>
 							{imageUrl && (
-								<div className="h-[20rem] w-full rounded-lg overflow-hidden mb-10 relative">
+								<div className="h-[20rem] w-full rounded-lg overflow-hidden mt-3 relative">
 									<img src={imageUrl} alt="cover image" className="w-full h-full" />
 									<div
 										className="absolute bg-gray right-2 top-2 w-8 h-8 rounded-md flex items-center justify-center cursor-pointer"
@@ -379,6 +386,13 @@ const Draft = () => {
 									</div>
 								</div>
 							)}
+							<textarea
+								placeholder="Title..."
+								className="w-full border-none rounded-lg mt-8 font-bold text-4xl outline-none focus:border-none hove:border-none scroll-m-0"
+								value={postContent?.title}
+								onChange={(e) => handleTitleChange(e)}
+							/>
+
 							<div className="">
 								<ReactQuill
 									placeholder="Write a post............."
