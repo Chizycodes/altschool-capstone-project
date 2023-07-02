@@ -14,6 +14,7 @@ import {
 	getDoc,
 	onSnapshot,
 	serverTimestamp,
+	setDoc,
 } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import SpinLoader from '../../components/general/SpinLoader';
@@ -46,6 +47,7 @@ const Draft = () => {
 	const { id } = useParams();
 	const navigate = useNavigate();
 	const [loadImage, setLoadImage] = useState(false);
+	const [loadNewDraft, setLoadNewDraft] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [savingDraft, setSavingDraft] = useState(false);
 	const [image, setImage] = useState<any>('');
@@ -61,6 +63,16 @@ const Draft = () => {
 	const [published, setPublished] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const location = useLocation();
+	const data = {
+		...postContent,
+		coverImage: imageUrl,
+		author: {
+			id: currentUser?.id,
+			firstName: currentUser?.firstName,
+			lastName: currentUser?.lastName,
+		},
+		dateCreated: serverTimestamp(),
+	};
 
 	// Handle Image Upload
 	const handleFileChange = (e: any) => {
@@ -70,13 +82,6 @@ const Draft = () => {
 			return;
 		}
 		setImage(file);
-		// const reader = new FileReader();
-
-		// reader.onloadend = () => {
-		// 	setImageUrl(reader.result);
-		// };
-
-		// reader.readAsDataURL(file);
 	};
 
 	const publishPost = () => {
@@ -86,22 +91,11 @@ const Draft = () => {
 	const saveDraft = async () => {
 		setSavingDraft(true);
 		try {
-			const draft = await addDoc(collection(db, 'drafts'), {
-				...postContent,
-				coverImage: imageUrl,
-				author: {
-					id: currentUser?.id,
-					firstName: currentUser?.firstName,
-					lastName: currentUser?.lastName,
-				},
-				dateCreated: serverTimestamp(),
-			});
-			console.log(draft.id, 'draft');
+			const draft = await setDoc(doc(db, 'drafts', `${id}`), data);
+			console.log(draft, 'draft');
 			setSavingDraft(false);
 		} catch (error) {
-			console.log(error, 'error');
 			const errorCode = error.code;
-			const errorMessage = error.message;
 			setSavingDraft(false);
 			toast.error(errorCode);
 		}
@@ -167,12 +161,32 @@ const Draft = () => {
 		}
 	}, [id]);
 
+	// Create new draft
+	useEffect(() => {
+		const createNewDraft = async () => {
+			setLoadNewDraft(true);
+			try {
+				const draft = await addDoc(collection(db, 'drafts'), data);
+				console.log(draft.id, 'draft');
+				navigate(`/dashboard/draft/${draft.id}`);
+				setLoadNewDraft(false);
+			} catch (error) {
+				const errorCode = error.code;
+				setLoadNewDraft(false);
+				toast.error(errorCode);
+			}
+		};
+		if (!id) {
+			createNewDraft();
+		}
+	}, [id]);
+
+	// Save draft every 5 seconds
 	useEffect(() => {
 		const saveDraftInterval = setTimeout(() => {
 			if (postContent?.body.trim() !== '' || postContent?.title.trim() !== '') {
 				// setSavingDraft(true);
 				// saveDraft();
-				console.log('saving draft');
 			}
 		}, 5000);
 
@@ -208,86 +222,94 @@ const Draft = () => {
 
 	return (
 		<div className="w-full bg-white p-5 md:px-20 mx-auto min-h-screen">
-			<DraftDrawer drafts={drafts}>
-				<div className="mb-20 relative">
-					{savingDraft && (
-						<div className="absolute">
-							<p className="text-green-500 flex items-center gap-2 ">
-								Saving draft <SpinLoader />
-							</p>
-						</div>
-					)}
-					<div className="flex gap-3 justify-between w-full mb-5">
-						<label htmlFor="my-drawer-4" className="drawer-button">
-							<svg
-								aria-label="Main Menu"
-								aria-haspopup="true"
-								xmlns="http://www.w3.org/2000/svg"
-								className="icon icon-tabler icon-tabler-menu cursor-pointer"
-								width={30}
-								height={30}
-								viewBox="0 0 24 24"
-								strokeWidth="1.5"
-								stroke="currentColor"
-								fill="none"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-							>
-								<path stroke="none" d="M0 0h24v24H0z" />
-								<line x1={4} y1={8} x2={20} y2={8} />
-								<line x1={4} y1={16} x2={20} y2={16} />
-							</svg>
-						</label>
-						<div className="flex gap-3 justify-between">
-							<div>
-								<Button text="Preview" styles="bg-white" />
-							</div>
-							<div onClick={saveDraft}>
-								<Button text="Publish" isDisabled={loading} />
-							</div>
-						</div>
+			{loadNewDraft ? (
+				<>
+					<div className="flex justify-center items-center h-full">
+						<SpinLoader />
 					</div>
-					<div className="flex gap-3 mb-3 font">
-						<div onClick={() => inputRef.current?.click()}>
-							<Button
-								styles={`bg-none hover:bg-[#543ee093] font-normal text-base border-none ${
-									loadImage ? 'cursor-not-allowed' : 'cursor-pointer'
-								}}`}
-								image="/images/image-icon.svg"
-								text={loadImage ? 'Uploading...' : 'Add Cover'}
-								isDisabled={loadImage}
-							/>
-						</div>
-
-						<input ref={inputRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
-						{/* <span>Add Subtitle</span> */}
-					</div>
-					<div>
-						<textarea
-							placeholder="Title..."
-							className="w-full border-none rounded-lg mt-3 font-bold text-4xl outline-none focus:border-none hove:border-none scroll-m-0"
-							value={postContent?.title}
-							onChange={(e) => setPostContent({ ...postContent, title: e.target.value })}
-						/>
-						{imageUrl && (
-							<div className="h-[20rem] w-full rounded-lg overflow-hidden mb-10">
-								<img src={imageUrl} alt="cover image" className="w-full h-full" />
+				</>
+			) : (
+				<DraftDrawer drafts={drafts}>
+					<div className="mb-20 relative">
+						{savingDraft && (
+							<div className="absolute">
+								<p className="text-green-500 flex items-center gap-2 ">
+									Saving draft <SpinLoader />
+								</p>
 							</div>
 						)}
-						<div className="">
-							<ReactQuill
-								placeholder="Write a post............."
-								value={postContent?.body}
-								modules={modules}
-								formats={formats}
-								onChange={(value) => setPostContent({ ...postContent, body: value })}
-								className="h-40 text-base"
-								theme="snow"
+						<div className="flex gap-3 justify-between w-full mb-5">
+							<label htmlFor="my-drawer-4" className="drawer-button">
+								<svg
+									aria-label="Main Menu"
+									aria-haspopup="true"
+									xmlns="http://www.w3.org/2000/svg"
+									className="icon icon-tabler icon-tabler-menu cursor-pointer"
+									width={30}
+									height={30}
+									viewBox="0 0 24 24"
+									strokeWidth="1.5"
+									stroke="currentColor"
+									fill="none"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+								>
+									<path stroke="none" d="M0 0h24v24H0z" />
+									<line x1={4} y1={8} x2={20} y2={8} />
+									<line x1={4} y1={16} x2={20} y2={16} />
+								</svg>
+							</label>
+							<div className="flex gap-3 justify-between">
+								<div>
+									<Button text="Preview" styles="bg-white" />
+								</div>
+								<div onClick={saveDraft}>
+									<Button text="Publish" isDisabled={loading} />
+								</div>
+							</div>
+						</div>
+						<div className="flex gap-3 mb-3 font">
+							<div onClick={() => inputRef.current?.click()}>
+								<Button
+									styles={`bg-none hover:bg-[#543ee093] font-normal text-base border-none ${
+										loadImage ? 'cursor-not-allowed' : 'cursor-pointer'
+									}}`}
+									image="/images/image-icon.svg"
+									text={loadImage ? 'Uploading...' : 'Add Cover'}
+									isDisabled={loadImage}
+								/>
+							</div>
+
+							<input ref={inputRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
+							{/* <span>Add Subtitle</span> */}
+						</div>
+						<div>
+							<textarea
+								placeholder="Title..."
+								className="w-full border-none rounded-lg mt-3 font-bold text-4xl outline-none focus:border-none hove:border-none scroll-m-0"
+								value={postContent?.title}
+								onChange={(e) => setPostContent({ ...postContent, title: e.target.value })}
 							/>
+							{imageUrl && (
+								<div className="h-[20rem] w-full rounded-lg overflow-hidden mb-10">
+									<img src={imageUrl} alt="cover image" className="w-full h-full" />
+								</div>
+							)}
+							<div className="">
+								<ReactQuill
+									placeholder="Write a post............."
+									value={postContent?.body}
+									modules={modules}
+									formats={formats}
+									onChange={(value) => setPostContent({ ...postContent, body: value })}
+									className="h-40 text-base"
+									theme="snow"
+								/>
+							</div>
 						</div>
 					</div>
-				</div>
-			</DraftDrawer>
+				</DraftDrawer>
+			)}
 		</div>
 	);
 };
