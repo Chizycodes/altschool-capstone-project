@@ -16,12 +16,14 @@ import {
 	onSnapshot,
 	serverTimestamp,
 	setDoc,
+	query,
+	where,
 } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import SpinLoader from '../../components/general/SpinLoader';
 import DraftDrawer from '../../components/dashboard/DraftDrawer';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { CheckOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 
 const modules = {
 	toolbar: [
@@ -178,8 +180,9 @@ const Draft = () => {
 
 	// Get Draft List
 	useEffect(() => {
+		const q = query(collection(db, 'drafts'), where('author.id', '==', currentUser?.id));
 		const unsub = onSnapshot(
-			collection(db, 'drafts'),
+			q,
 			(snapshot) => {
 				const list: any = [];
 				snapshot.docs.forEach((doc) => {
@@ -350,8 +353,11 @@ const Draft = () => {
 								onChange={handleTitleChange}
 							/>
 							{imageUrl && (
-								<div className="h-[20rem] w-full rounded-lg overflow-hidden mb-10">
+								<div className="h-[20rem] w-full rounded-lg overflow-hidden mb-10 relative">
 									<img src={imageUrl} alt="cover image" className="w-full h-full" />
+									<div className="absolute bg-gray right-2 top-2 w-8 h-8 rounded-md flex items-center justify-center">
+										<CloseOutlined />
+									</div>
 								</div>
 							)}
 							<div className="">
