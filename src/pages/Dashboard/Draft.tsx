@@ -143,11 +143,10 @@ const Draft = () => {
 			const docSnap = await getDoc(docRef);
 
 			if (docSnap.exists()) {
-				console.log('Document data:', docSnap.data());
-				// setPostContent(docSnap.data());
-				// setImageUrl(docSnap.data().coverImage);
+				const { title, body, coverImage } = docSnap.data();
+				setPostContent({ title, body });
+				setImageUrl(coverImage);
 			} else {
-				// doc.data() will be undefined in this case
 				console.log('No such document!');
 			}
 		};
