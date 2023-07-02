@@ -68,9 +68,7 @@ const Draft = () => {
 		...postContent,
 		coverImage: imageUrl,
 		author: {
-			id: currentUser?.id,
-			firstName: currentUser?.firstName,
-			lastName: currentUser?.lastName,
+			...currentUser,
 		},
 		timestamp: serverTimestamp(),
 	};

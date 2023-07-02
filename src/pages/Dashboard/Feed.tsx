@@ -1,12 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Post from '../../components/dashboard/Post';
 import Button from '../../components/general/Button';
+import { collection, doc, getDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 type Props = '';
 
 const Feed = () => {
 	const { pathname } = useLocation();
+	const [posts, setPosts] = useState<any[]>([]);
+	const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+		const postQuery = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
+		const postUnsub = onSnapshot(postQuery, (snapshot) => {
+			const postList: any = [];
+			snapshot.docs.forEach((doc) => {
+				postList.push({ id: doc.id, ...doc.data() });
+			});
+			setPosts(postList);
+		});
+		return () => {
+			postUnsub();
+		};
+	}, []);
+
 	return (
 		<div className="max-w-3xl bg-white p-5 md:p-10 mx-auto">
 			<div className="flex flex-row justify-between gap-3">
@@ -55,10 +74,11 @@ const Feed = () => {
 			</div>
 
 			<div className="mt-8">
-				<Post />
-				<Post />
-				<Post />
-				<Post />
+				{
+					posts?.map((post: any) => {
+						return <Post key={post.id} post={post} />;
+					})
+				}
 			</div>
 		</div>
 	);
