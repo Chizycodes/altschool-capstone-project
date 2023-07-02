@@ -25,7 +25,7 @@ const DraftDrawer = ({ children, drafts, deleteDraft }) => {
 									}`}
 								>
 									<Link className="hover:text-[#5444F2]" to={`/draft/${draft?.id}`}>
-										{draft?.title}
+										{draft?.title == '' ? 'Untitled' : draft?.title}
 									</Link>
 
 									<div className="dropdown dropdown-end">

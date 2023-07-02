@@ -21,6 +21,7 @@ import { useAuth } from '../../context/AuthContext';
 import SpinLoader from '../../components/general/SpinLoader';
 import DraftDrawer from '../../components/dashboard/DraftDrawer';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { CheckOutlined } from '@ant-design/icons';
 
 const modules = {
 	toolbar: [
@@ -45,7 +46,8 @@ const formats = [
 ];
 
 const Draft = () => {
-	const { id } = useParams();
+	const id = useParams()?.id;
+	console.log(id, 'id');
 	const navigate = useNavigate();
 	const [loadImage, setLoadImage] = useState(false);
 	const [loadNewDraft, setLoadNewDraft] = useState(false);
@@ -53,16 +55,18 @@ const Draft = () => {
 	const [savingDraft, setSavingDraft] = useState(false);
 	const [image, setImage] = useState<any>('');
 	const [imageUrl, setImageUrl] = useState<any>('');
+	// const [draftId, setDraftId] = useState<any>(id);
+	const [timerId, setTimerId] = useState<any>(null);
 	const [postContent, setPostContent] = useState({
 		title: '',
 		body: '',
 	});
+	const [isSaved, setIsSaved] = useState(false);
 	const inputRef = useRef<HTMLInputElement | null>(null);
 	const { currentUser } = useAuth();
-
 	const [drafts, setDrafts] = useState([]);
 	const [published, setPublished] = useState([]);
-	const [isLoading, setIsLoading] = useState(true);
+
 	const data = {
 		...postContent,
 		coverImage: imageUrl,
@@ -72,6 +76,21 @@ const Draft = () => {
 			lastName: currentUser?.lastName,
 		},
 		dateCreated: serverTimestamp(),
+	};
+
+	// Handle publish post
+	const publishPost = async () => {
+		setLoading(true);
+		try {
+			const post = await addDoc(collection(db, 'posts'), data);
+			console.log(post.id, 'draft');
+			await deleteDoc(doc(db, 'drafts', `${id}`));
+			toast.success('Post published successfully');
+			setLoading(false);
+		} catch (error) {
+			toast.error(error.code);
+			setLoading(false);
+		}
 	};
 
 	// Handle Image Upload
@@ -84,23 +103,7 @@ const Draft = () => {
 		setImage(file);
 	};
 
-	const publishPost = () => {
-		console.log('publish');
-	};
-
-	const saveDraft = async () => {
-		setSavingDraft(true);
-		try {
-			const draft = await setDoc(doc(db, 'drafts', `${id}`), data);
-			console.log(draft, 'draft');
-			setSavingDraft(false);
-		} catch (error) {
-			const errorCode = error.code;
-			setSavingDraft(false);
-			toast.error(errorCode);
-		}
-	};
-
+	// Image Upload to Firebase Storage
 	useEffect(() => {
 		const uploadCoverImage = async (file: any) => {
 			const name = new Date().getTime() + image?.name;
@@ -142,58 +145,35 @@ const Draft = () => {
 		}
 	}, [image]);
 
-	// Get Draft
-	useEffect(() => {
-		const getDraft = async () => {
-			const docRef = doc(db, 'drafts', `${id}`);
-			const docSnap = await getDoc(docRef);
+	// Get Draft or Create New Draft
 
-			if (docSnap.exists()) {
-				const { title, body, coverImage } = docSnap.data();
-				setPostContent({ title, body });
-				setImageUrl(coverImage);
-			} else {
-				console.log('No such document!');
-			}
-		};
-		if (id) {
-			getDraft();
+	const getDraft = async (id: string) => {
+		const docRef = doc(db, 'drafts', `${id}`);
+		const docSnap = await getDoc(docRef);
+
+		if (docSnap.exists()) {
+			const { title, body, coverImage } = docSnap.data();
+			setPostContent({ title, body });
+			setImageUrl(coverImage);
+		} else {
+			console.log('No such document!');
+			navigate('/draft');
 		}
-	}, [id]);
+	};
 
-	// Create new draft
-	useEffect(() => {
-		const createNewDraft = async () => {
-			setLoadNewDraft(true);
-			try {
-				const draft = await addDoc(collection(db, 'drafts'), data);
-				console.log(draft.id, 'draft');
-				navigate(`/dashboard/draft/${draft.id}`);
-				setLoadNewDraft(false);
-			} catch (error) {
-				const errorCode = error.code;
-				setLoadNewDraft(false);
-				toast.error(errorCode);
-			}
-		};
-		if (!id) {
-			createNewDraft();
+	const createNewDraft = async () => {
+		setLoadNewDraft(true);
+		try {
+			const draft = await addDoc(collection(db, 'drafts'), data);
+			console.log(draft.id, 'draft');
+			navigate(`/draft/${draft.id}`);
+			setLoadNewDraft(false);
+		} catch (error) {
+			const errorCode = error.code;
+			setLoadNewDraft(false);
+			toast.error(errorCode);
 		}
-	}, [id]);
-
-	// Save draft every 5 seconds
-	useEffect(() => {
-		const saveDraftInterval = setTimeout(() => {
-			if (postContent?.body.trim() !== '' || postContent?.title.trim() !== '') {
-				// setSavingDraft(true);
-				// saveDraft();
-			}
-		}, 5000);
-
-		return () => {
-			clearTimeout(saveDraftInterval);
-		};
-	}, [postContent]);
+	};
 
 	// Get Draft List
 	useEffect(() => {
@@ -208,7 +188,13 @@ const Draft = () => {
 
 				// Set first draft id in url
 				if (list?.length > 0) {
-					navigate(`/draft/${list[0]?.id}`);
+					const { title, body, coverImage, id } = list[0];
+					navigate(`/draft/${id}`);
+					setPostContent({ title, body });
+					setImageUrl(coverImage);
+				} else {
+					navigate('/draft');
+					createNewDraft();
 				}
 			},
 			(error) => {
@@ -223,11 +209,66 @@ const Draft = () => {
 	// Delete Draft
 	const deleteDraft = async (id: string) => {
 		try {
+			const confirmed = confirm('Are you sure you want to delete this draft?');
+			if (!confirmed) return;
 			await deleteDoc(doc(db, 'drafts', `${id}`));
 			toast.success('Draft deleted');
 		} catch (error) {
 			toast.error(error.code);
 		}
+	};
+
+	// Save draft every 5 seconds
+	const saveDraft = async () => {
+		setSavingDraft(true);
+		try {
+			const draft = await setDoc(doc(db, 'drafts', `${id}`), data);
+			console.log(draft, 'draft');
+			setSavingDraft(false);
+			setIsSaved(true);
+			setTimeout(() => {
+				setIsSaved(false);
+			}, 2000);
+		} catch (error) {
+			const errorCode = error.code;
+			setSavingDraft(false);
+			toast.error(errorCode);
+		}
+	};
+	useEffect(() => {
+		return () => {
+			clearTimeout(timerId);
+		};
+	}, [timerId]);
+
+	const handleTitleChange = (e: any) => {
+		setPostContent({ ...postContent, title: e.target.value });
+
+		clearTimeout(timerId);
+
+		// Set a new timer to save the input text after 10 seconds
+
+		const newTimerId = setTimeout(() => {
+			if (postContent?.title.trim() !== '') {
+				saveDraft();
+			}
+		}, 7000);
+		setTimerId(newTimerId);
+	};
+
+	const handleBodyChange = (value: string) => {
+		setPostContent({ ...postContent, body: value });
+
+		clearTimeout(timerId);
+
+		// Set a new timer to save the input text after 10 seconds
+
+		const newTimerId = setTimeout(() => {
+			if (postContent?.body.trim() !== '') {
+				saveDraft();
+			}
+		}, 7000);
+		setTimerId(newTimerId);
 	};
 
 	return (
@@ -241,13 +282,6 @@ const Draft = () => {
 			) : (
 				<DraftDrawer drafts={drafts} deleteDraft={deleteDraft}>
 					<div className="mb-20 relative">
-						{savingDraft && (
-							<div className="absolute">
-								<p className="text-green-500 flex items-center gap-2 ">
-									Saving draft <SpinLoader />
-								</p>
-							</div>
-						)}
 						<div className="flex gap-3 justify-between w-full mb-5">
 							<label htmlFor="my-drawer-4" className="drawer-button">
 								<svg
@@ -269,11 +303,21 @@ const Draft = () => {
 									<line x1={4} y1={16} x2={20} y2={16} />
 								</svg>
 							</label>
+							{savingDraft && (
+								<p className="text-green-500 flex items-center gap-2 ">
+									Saving draft <SpinLoader />
+								</p>
+							)}
+							{isSaved && (
+								<p className="text-green-500 flex items-center gap-2 ">
+									Saved <CheckOutlined className="text-green-500" />
+								</p>
+							)}
 							<div className="flex gap-3 justify-between">
 								<div>
 									<Button text="Preview" styles="bg-white" />
 								</div>
-								<div onClick={saveDraft}>
+								<div onClick={publishPost}>
 									<Button text="Publish" isDisabled={loading} />
 								</div>
 							</div>
@@ -298,7 +342,7 @@ const Draft = () => {
 								placeholder="Title..."
 								className="w-full border-none rounded-lg mt-3 font-bold text-4xl outline-none focus:border-none hove:border-none scroll-m-0"
 								value={postContent?.title}
-								onChange={(e) => setPostContent({ ...postContent, title: e.target.value })}
+								onChange={handleTitleChange}
 							/>
 							{imageUrl && (
 								<div className="h-[20rem] w-full rounded-lg overflow-hidden mb-10">
@@ -311,7 +355,7 @@ const Draft = () => {
 									value={postContent?.body}
 									modules={modules}
 									formats={formats}
-									onChange={(value) => setPostContent({ ...postContent, body: value })}
+									onChange={handleBodyChange}
 									className="h-40 text-base"
 									theme="snow"
 								/>
