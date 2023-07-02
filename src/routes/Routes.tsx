@@ -22,11 +22,12 @@ const AppRoutes = () => {
 					<Route path="login" element={<Navigate to="/feed" />} />
 					<Route element={<Dashboardlayout />}>
 						<Route path="draft" element={<Draft />} />
+						<Route path="draft/:id" element={<Draft />} />
 					</Route>
 				</>
 			) : (
 				<>
-					<Route path="draft" element={<Navigate to="/login" />} />
+					<Route path="draft*" element={<Navigate to="/login" />} />
 					<Route path="login" element={<Auth />} />
 				</>
 			)}

@@ -8,9 +8,9 @@ import { AuthContextProvider } from './context/AuthContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 	<React.StrictMode>
-			<AuthContextProvider>
-				<App />
-				<ToastContainer position="top-right" closeOnClick theme="light" />
-			</AuthContextProvider>
+		<AuthContextProvider>
+			<App />
+			<ToastContainer position="top-right" closeOnClick theme="light" />
+		</AuthContextProvider>
 	</React.StrictMode>
 );

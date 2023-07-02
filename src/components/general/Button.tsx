@@ -19,7 +19,7 @@ const Button: React.FC<ButtonProps> = ({
 	return (
 		<div>
 			<button
-				className={`btn border-primary hover:border-primary normal-case hover:bg-[#543ee093] min-w-[130px] w-full flex justify-center items-center gap-3 ${styles}`}
+				className={`btn border-primary hover:border-primary normal-case hover:bg-[#543ee093] min-w-[130px] w-full flex justify-center items-center gap-2 ${styles}`}
 				disabled={isDisabled}
 			>
 				{isLoading ? (

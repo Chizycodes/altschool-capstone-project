@@ -20,13 +20,13 @@ export const navItems = {
 			link: '#',
 			id: 3,
 		},
-		{
-			title: 'Team Blogs',
-			icon: '/images/team-icon.svg',
-			iconActive: '/images/team-icon.svg',
-			link: '#',
-			id: 4,
-		},
+		// {
+		// 	title: 'Team Blogs',
+		// 	icon: '/images/team-icon.svg',
+		// 	iconActive: '/images/team-icon.svg',
+		// 	link: '#',
+		// 	id: 4,
+		// },
 		{
 			title: 'Drafts',
 			icon: '/images/draft-icon.svg',
@@ -34,18 +34,19 @@ export const navItems = {
 			link: '/draft',
 			id: 5,
 		},
-		{
-			title: 'Analytics',
-			icon: '/images/analytics-icon.svg',
-			iconActive: '/images/analytics-icon.svg',
-			link: '#',
-			id: 6,
-		},
+		// {
+		// 	title: 'Analytics',
+		// 	icon: '/images/analytics-icon.svg',
+		// 	iconActive: '/images/analytics-icon.svg',
+		// 	link: '#',
+		// 	id: 6,
+		// },
 	],
 	trends: [
 		{
 			title: 'Trending Tags',
 			icon: '/images/trend-icon.svg',
+			link: '',
 			header: true,
 			id: 1,
 		},

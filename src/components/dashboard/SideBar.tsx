@@ -32,12 +32,16 @@ export const SideBar = ({ show, setShow }) => {
 											</div>
 										)}
 										<div>
-											<Link
-												to={item.link}
-												className={item.link && location.pathname.startsWith(item.link) ? 'text-primary' : ''}
-											>
-												{item.title}
-											</Link>
+											{item?.header ? (
+												<p className="">{item.title}</p>
+											) : (
+												<Link
+													to={item.link}
+													className={item.link && location.pathname.startsWith(item.link) ? 'text-primary' : ''}
+												>
+													{item.title}
+												</Link>
+											)}
 										</div>
 									</div>
 								</li>
@@ -57,9 +61,13 @@ export const SideBar = ({ show, setShow }) => {
 									}`}
 								>
 									<div className="flex items-center gap-4">
-										<Link to={item.link} className="">
-											{item.title}
-										</Link>
+										{item?.header ? (
+											<p className="">{item.title}</p>
+										) : (
+											<Link to={item.link} className="">
+												{item.title}
+											</Link>
+										)}
 										{item.header && (
 											<div>
 												<img src={item.icon} alt={item.title} />
@@ -118,6 +126,7 @@ export const SideBar = ({ show, setShow }) => {
 									{navItems.overview.map((item, i) => {
 										return (
 											<li
+												key={i}
 												className={`pl-6 cursor-pointer leading-4  focus:outline-none ${
 													item.header
 														? 'text-[#000000] font-bold mb-[22px] mt-[33px] uppercase cursor-default text-sm'
@@ -144,6 +153,7 @@ export const SideBar = ({ show, setShow }) => {
 									{navItems.trends.map((item, i) => {
 										return (
 											<li
+												key={i}
 												className={`pl-6 cursor-pointer leading-4  focus:outline-none ${
 													item.header
 														? 'text-black font-bold mb-[22px] uppercase cursor-default text-sm'
@@ -151,9 +161,13 @@ export const SideBar = ({ show, setShow }) => {
 												}`}
 											>
 												<div className="flex items-center gap-4">
-													<Link to={item.link} className="">
-														{item.title}
-													</Link>
+													{item?.header ? (
+														<p className="">{item.title}</p>
+													) : (
+														<Link to={item.link} className="">
+															{item.title}
+														</Link>
+													)}
 													{item.header && (
 														<div>
 															<img src={item.icon} alt={item.title} />

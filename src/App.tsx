@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import AppRoutes from './routes/Routes';
+import SuspendedScreen from './components/general/SuspendedScreen';
+import { useAuth } from './context/AuthContext';
 
 function App() {
+	const { isLoading } = useAuth();
+	const AppRoutes = lazy(() => import('./routes/Routes'));
 	return (
 		<BrowserRouter>
-			<Routes>
-				<Route path="*" element={<AppRoutes />} />
-			</Routes>
+			{isLoading ? (
+				<SuspendedScreen />
+			) : (
+				<Suspense fallback={<SuspendedScreen />}>
+					<AppRoutes />
+				</Suspense>
+			)}
 		</BrowserRouter>
 	);
 }
