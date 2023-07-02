@@ -92,15 +92,25 @@ const Draft = () => {
 			...data,
 			likesCount: 0,
 			commentsCount: 0,
+			timestamp: serverTimestamp(),
 		};
 		try {
-			await addDoc(collection(db, 'posts'), data).then(async (docRef) => {
-				await deleteDoc(doc(db, 'drafts', `${id}`));
-				toast.success('Post published successfully');
-				setLoading(false);
-				console.log('Document written with ID: ', docRef);
-				navigate(`/feed/${docRef.id}`);
-			});
+			if (location.pathname.includes(`/draft/${id}`)) {
+				await addDoc(collection(db, 'posts'), post).then(async (docRef) => {
+					await deleteDoc(doc(db, 'drafts', `${id}`));
+					toast.success('Post published successfully');
+					setLoading(false);
+					console.log('Document written with ID: ', docRef);
+					navigate(`/feed/${docRef.id}`);
+				});
+			}
+			if (location.pathname.includes(`/edit/${id}`)) {
+				await setDoc(doc(db, 'posts', `${id}`), post).then(async () => {
+					toast.success('Post updated successfully');
+					setLoading(false);
+					// navigate(`/feed/${docRef.id}`);
+				});
+			}
 		} catch (error) {
 			toast.error(error.code);
 			setLoading(false);
@@ -173,13 +183,13 @@ const Draft = () => {
 		}
 	};
 	useEffect(() => {
-		if(id){
+		if (id) {
 			if (location.pathname.includes(`/draft/${id}`)) {
 				getContent('drafts');
 			}
 			if (location.pathname.includes(`/edit/${id}`)) {
 				getContent('posts');
-			} 
+			}
 		}
 	}, [id, location.pathname]);
 	const createNewDraft = async () => {
@@ -288,7 +298,7 @@ const Draft = () => {
 
 	useEffect(() => {
 		let newTimerId: any;
-		if(location.pathname.includes(`/draft`)){
+		if (location.pathname.includes(`/draft`)) {
 			newTimerId = setTimeout(() => {
 				if (postContent?.body || postContent?.title || imageUrl) {
 					saveDraft();
