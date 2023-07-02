@@ -4,32 +4,32 @@ import { db } from '../../firebase';
 import { toast } from 'react-toastify';
 import { Link, useParams, useLocation } from 'react-router-dom';
 
-const DraftDrawer = ({ children }) => {
-	const [drafts, setDrafts] = useState([]);
-  const [published, setPublished] = useState([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const { id } = useParams<{ id: string }>();
-	const location = useLocation();
+const DraftDrawer = ({ children, drafts }) => {
+	// const [drafts, setDrafts] = useState([]);
+  // const [published, setPublished] = useState([]);
+	// const [isLoading, setIsLoading] = useState(true);
+	// const { id } = useParams<{ id: string }>();
+	// const location = useLocation();
 
-	console.log(drafts, 'drafts');
-	useEffect(() => {
-		const unsub = onSnapshot(
-			collection(db, 'drafts'),
-			(snapshot) => {
-				const list: any = [];
-				snapshot.docs.forEach((doc) => {
-					list.push({ id: doc.id, ...doc.data() });
-				});
-				setDrafts(list);
-			},
-			(error) => {
-				toast.error(error.code);
-			}
-		);
-		return () => {
-			unsub();
-		};
-	}, []);
+	// console.log(drafts, 'drafts');
+	// useEffect(() => {
+	// 	const unsub = onSnapshot(
+	// 		collection(db, 'drafts'),
+	// 		(snapshot) => {
+	// 			const list: any = [];
+	// 			snapshot.docs.forEach((doc) => {
+	// 				list.push({ id: doc.id, ...doc.data() });
+	// 			});
+	// 			setDrafts(list);
+	// 		},
+	// 		(error) => {
+	// 			toast.error(error.code);
+	// 		}
+	// 	);
+	// 	return () => {
+	// 		unsub();
+	// 	};
+	// }, []);
 	return (
 		<div className="drawer drawer-end">
 			<input id="my-drawer-4" type="checkbox" className="drawer-toggle" />

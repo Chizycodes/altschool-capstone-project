@@ -5,11 +5,20 @@ import 'react-quill/dist/quill.snow.css';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../firebase';
 import { toast } from 'react-toastify';
-import { DocumentData, DocumentReference, addDoc, collection, doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import {
+	DocumentData,
+	DocumentReference,
+	addDoc,
+	collection,
+	doc,
+	getDoc,
+	onSnapshot,
+	serverTimestamp,
+} from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import SpinLoader from '../../components/general/SpinLoader';
 import DraftDrawer from '../../components/dashboard/DraftDrawer';
-import { useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 const modules = {
 	toolbar: [
@@ -35,6 +44,7 @@ const formats = [
 
 const Draft = () => {
 	const { id } = useParams();
+	const navigate = useNavigate();
 	const [loadImage, setLoadImage] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [savingDraft, setSavingDraft] = useState(false);
@@ -46,6 +56,11 @@ const Draft = () => {
 	});
 	const inputRef = useRef<HTMLInputElement | null>(null);
 	const { currentUser } = useAuth();
+
+	const [drafts, setDrafts] = useState([]);
+	const [published, setPublished] = useState([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const location = useLocation();
 
 	// Handle Image Upload
 	const handleFileChange = (e: any) => {
@@ -101,8 +116,6 @@ const Draft = () => {
 			uploadTask.on(
 				'state_changed',
 				(snapshot) => {
-					// const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-					// console.log('Upload is ' + progress + '% done');
 					switch (snapshot.state) {
 						case 'paused':
 							toast.info('Upload is paused');
@@ -117,7 +130,6 @@ const Draft = () => {
 				(error) => {
 					// Handle unsuccessful uploads
 					const errorCode = error.code;
-					const errorMessage = error.message;
 					toast.error(errorCode);
 					setLoadImage(false);
 				},
@@ -168,9 +180,35 @@ const Draft = () => {
 			clearTimeout(saveDraftInterval);
 		};
 	}, [postContent]);
+
+	// Get Draft List
+	useEffect(() => {
+		const unsub = onSnapshot(
+			collection(db, 'drafts'),
+			(snapshot) => {
+				const list: any = [];
+				snapshot.docs.forEach((doc) => {
+					list.push({ id: doc.id, ...doc.data() });
+				});
+				setDrafts(list);
+
+				// Set first draft id in url
+				if (list?.length > 0) {
+					navigate(`/draft/${list[0]?.id}`);
+				}
+			},
+			(error) => {
+				toast.error(error.code);
+			}
+		);
+		return () => {
+			unsub();
+		};
+	}, []);
+
 	return (
 		<div className="w-full bg-white p-5 md:px-20 mx-auto min-h-screen">
-			<DraftDrawer>
+			<DraftDrawer drafts={drafts}>
 				<div className="mb-20 relative">
 					{savingDraft && (
 						<div className="absolute">
