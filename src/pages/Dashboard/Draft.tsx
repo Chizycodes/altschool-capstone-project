@@ -137,6 +137,7 @@ const Draft = () => {
 						console.log('File available at', downloadURL);
 						setImageUrl(downloadURL);
 					});
+					saveDraft();
 				}
 			);
 		};
@@ -303,15 +304,19 @@ const Draft = () => {
 									<line x1={4} y1={16} x2={20} y2={16} />
 								</svg>
 							</label>
-							{savingDraft && (
-								<p className="text-green-500 flex items-center gap-2 ">
-									Saving draft <SpinLoader />
-								</p>
-							)}
-							{isSaved && (
-								<p className="text-green-500 flex items-center gap-2 ">
-									Saved <CheckOutlined className="text-green-500" />
-								</p>
+							{(savingDraft || isSaved) && (
+								<div className="fixed bg-white top-[100px] right-6 shadow-md rounded-md p-1">
+									{!savingDraft && (
+										<p className="text-green-500 flex items-center gap-2 ">
+											Saving draft <SpinLoader />
+										</p>
+									)}
+									{isSaved && (
+										<p className="text-green-500 flex items-center gap-2 ">
+											Saved <CheckOutlined className="text-green-500" />
+										</p>
+									)}
+								</div>
 							)}
 							<div className="flex gap-3 justify-between">
 								<div>
