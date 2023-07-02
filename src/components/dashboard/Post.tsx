@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { getDate, getReadTime, parseContent } from '../../utils/requests';
+import { getDate, getReadTime, parseContent, getLinkTitle } from '../../utils/requests';
 
 const Post = ({ post }) => {
 	return (
@@ -29,7 +29,7 @@ const Post = ({ post }) => {
 
 				<div className="flex">
 					<div className="w-[80%]">
-						<Link to={`feed/${post?.title}/${post?.id}`}>
+						<Link to={`/feed/${getLinkTitle(post?.title)}/${post?.id}`}>
 							<h2 className="text-xl mt-3 font-bold cursor-pointer hover:text-primary">{post?.title}</h2>
 						</Link>
 

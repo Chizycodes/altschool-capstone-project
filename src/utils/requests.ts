@@ -32,3 +32,8 @@ export const parseContent = (content: string) => {
 	const textContent = htmlDocument.documentElement.textContent;
 	return textContent;
 };
+
+export const getLinkTitle = (title: string) => {
+	const linkTitle = title?.toLowerCase().replace(/\s+/g, '-');
+	return linkTitle;
+}

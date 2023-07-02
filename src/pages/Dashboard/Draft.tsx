@@ -192,6 +192,7 @@ const Draft = () => {
 			}
 		}
 	}, [id, location.pathname]);
+	
 	const createNewDraft = async () => {
 		setLoadNewDraft(true);
 		try {
