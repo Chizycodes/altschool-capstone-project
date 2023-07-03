@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import Auth from '../pages/AuthPages/Auth';
 import Home from '../pages/Landing/Home';
 import Error404 from '../pages/Error/Error404';
@@ -11,6 +11,7 @@ import PrivateRoutes from './PrivateRoutes';
 
 const AppRoutes = () => {
 	const { currentUser } = useAuth();
+	const navigate = useNavigate();
 	return (
 		<Routes>
 			<Route index element={<Home />} />

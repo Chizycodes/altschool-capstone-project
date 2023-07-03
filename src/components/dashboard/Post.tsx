@@ -43,7 +43,7 @@ const Post = ({ post }) => {
 				<div className="w-full flex gap-5 mt-3 justify-center">
 					<div className="text-gray text-xs flex gap-2">
 						<img src="/images/book-icon.svg" alt="book icon" />{' '}
-						<span className="w-full">{getReadTime(post?.body)} mins read</span>
+						<span className="w-full">{getReadTime(post?.body)} min read</span>
 					</div>
 					<div className="flex gap-2 items-center">
 						<img className="cursor-pointer" src="/images/comment-icon.svg" alt="comment" />

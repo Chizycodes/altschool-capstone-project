@@ -10,23 +10,30 @@ const INITIAL_STATE = {
 };
 
 const AuthContext = createContext<any>(INITIAL_STATE);
-export const useAuth = () => useContext(AuthContext);
 
 export const AuthContextProvider = ({ children }) => {
 	const [state, dispatch] = useReducer(AuthReducer, INITIAL_STATE);
 
 	const fetchUser = async (id: any) => {
-		const user = await getUser(id);
-		dispatch({ type: 'LOGIN', payload: user });
-		dispatch({ type: 'USER_IS_LOADING', payload: false });
+		const docRef = doc(db, 'users', id);
+		const docSnap = await getDoc(docRef);
+		if (docSnap.exists()) {
+			dispatch({ type: 'LOGIN', payload: docSnap.data() });
+			dispatch({ type: 'USER_IS_LOADING', payload: false });
+		} else {
+			// doc.data() will be undefined in this case
+			console.log('No such document!');
+		}
+		// const user = await getUser(id).then((res) => {
+		// 	dispatch({ type: 'LOGIN', payload: user });
+		// 	dispatch({ type: 'USER_IS_LOADING', payload: false });
+		// });
 	};
 
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
 			if (currentUser) {
 				fetchUser(currentUser.uid);
-			} else {
-				dispatch({ type: 'LOGOUT' });
 			}
 		});
 		return () => {
@@ -40,6 +47,7 @@ export const AuthContextProvider = ({ children }) => {
 		</AuthContext.Provider>
 	);
 };
+export const useAuth = () => useContext(AuthContext);
 
 // AuthReducer
 const AuthReducer = (state: any, action: any) => {
