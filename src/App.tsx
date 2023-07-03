@@ -4,10 +4,8 @@ import SuspendedScreen from './components/general/SuspendedScreen';
 import { useAuth } from './context/AuthContext';
 
 function App() {
-	const { currentUser, userIsLoading } = useAuth();
+	const { userIsLoading } = useAuth();
 	const AppRoutes = lazy(() => import('./routes/Routes'));
-
-	// const isLoading = userIsLoading || false;
 
 	return (
 		<BrowserRouter>

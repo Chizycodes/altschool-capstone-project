@@ -14,15 +14,16 @@ const AppRoutes = () => {
 	const navigate = useNavigate();
 	return (
 		<Routes>
-			<Route index element={<Home />} />
-			<Route element={<Dashboardlayout />}>
-				<Route path="feed" element={<Feed />} />
-				<Route path="feed/:title/:id" element={<Feed />} />
+			<Route path="/*">
+				<Route index element={<Home />} />
+				<Route element={<Dashboardlayout />}>
+					<Route path="feed" element={<Feed />} />
+					<Route path="feed/:title/:id" element={<Feed />} />
+				</Route>
+				<Route path="login" element={currentUser ? <Navigate to="/feed" /> : <Auth />} />
+				<Route path="*" element={<PrivateRoutes />} />
+				<Route path="register" element={<Auth />} />
 			</Route>
-			<Route path="login" element={currentUser ? <Navigate to="/feed" /> : <Auth />} />
-			<Route path="/*" element={<PrivateRoutes />} />
-			<Route path="register" element={<Auth />} />
-			<Route path="*" element={<Error404 />} />
 		</Routes>
 	);
 };

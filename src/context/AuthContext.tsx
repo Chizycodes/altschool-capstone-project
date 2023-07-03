@@ -21,19 +21,16 @@ export const AuthContextProvider = ({ children }) => {
 			dispatch({ type: 'LOGIN', payload: docSnap.data() });
 			dispatch({ type: 'USER_IS_LOADING', payload: false });
 		} else {
-			// doc.data() will be undefined in this case
 			console.log('No such document!');
 		}
-		// const user = await getUser(id).then((res) => {
-		// 	dispatch({ type: 'LOGIN', payload: user });
-		// 	dispatch({ type: 'USER_IS_LOADING', payload: false });
-		// });
 	};
 
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
 			if (currentUser) {
 				fetchUser(currentUser.uid);
+			} else {
+				dispatch({ type: 'LOGOUT' });
 			}
 		});
 		return () => {
@@ -42,7 +39,7 @@ export const AuthContextProvider = ({ children }) => {
 	}, []);
 
 	return (
-		<AuthContext.Provider value={{ currentUser: state.currentUser, isLoading: state.userIsLoading, dispatch }}>
+		<AuthContext.Provider value={{ currentUser: state.currentUser, userIsLoading: state.userIsLoading, dispatch }}>
 			{children}
 		</AuthContext.Provider>
 	);
