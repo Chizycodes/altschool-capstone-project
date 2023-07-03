@@ -82,14 +82,14 @@ const Login = () => {
 					</div>
 				</div>
 			</form>
-			<div className="mt-5" onClick={googleSignIn}>
+			{/* <div className="mt-5" onClick={googleSignIn}>
 				<Button
 					image="/images/google_logo.svg"
 					styles="bg-white border-[#D0D0D0]"
 					text=" Sign in with google"
 					isDisabled={loading}
 				/>
-			</div>
+			</div> */}
 			{/* <div className="mt-5">
 				<Button image="/images/linkedin_logo.svg" styles="bg-white border-[#D0D0D0]" text="Sign up with Linkedin" />
 			</div> */}
