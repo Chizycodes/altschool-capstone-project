@@ -31,6 +31,7 @@ export const AuthContextProvider = ({ children }) => {
 				fetchUser(currentUser.uid);
 			} else {
 				dispatch({ type: 'LOGOUT' });
+				dispatch({ type: 'USER_IS_LOADING', payload: false });
 			}
 		});
 		return () => {

@@ -5,6 +5,7 @@ import { useAuth } from './context/AuthContext';
 
 function App() {
 	const { userIsLoading } = useAuth();
+	console.log(userIsLoading);
 	const AppRoutes = lazy(() => import('./routes/Routes'));
 
 	return (

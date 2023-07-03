@@ -11,7 +11,7 @@ import PrivateRoutes from './PrivateRoutes';
 
 const AppRoutes = () => {
 	const { currentUser } = useAuth();
-	const navigate = useNavigate();
+	console.log(currentUser)
 	return (
 		<Routes>
 			<Route path="/*">
