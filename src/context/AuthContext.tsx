@@ -21,7 +21,8 @@ export const AuthContextProvider = ({ children }) => {
 			dispatch({ type: 'LOGIN', payload: docSnap.data() });
 			dispatch({ type: 'USER_IS_LOADING', payload: false });
 		} else {
-			console.log('No such document!');
+			dispatch({ type: 'LOGOUT' });
+			dispatch({ type: 'USER_IS_LOADING', payload: false });
 		}
 	};
 

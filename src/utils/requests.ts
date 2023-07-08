@@ -1,6 +1,7 @@
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import dayjs from 'dayjs';
+import * as sanitizeHtml from 'sanitize-html';
 
 export const getUser = async (id: string) => {
 	const docRef = doc(db, 'users', id);
@@ -14,7 +15,7 @@ export const getUser = async (id: string) => {
 };
 
 export const getDate = (timestamp: any) => {
-	const date = new Date(timestamp.seconds * 1000);
+	const date = new Date(timestamp?.seconds * 1000);
 	const formattedDate = dayjs(date).format('D MMMM, YYYY');
 	return formattedDate;
 };
@@ -36,4 +37,9 @@ export const parseContent = (content: string) => {
 export const getLinkTitle = (title: string) => {
 	const linkTitle = title?.toLowerCase().replace(/\s+/g, '-');
 	return linkTitle;
+}
+
+export const SanitizeHtml = (html: string) => {
+	const clean = sanitizeHtml(html);
+	return {__html: clean};
 }

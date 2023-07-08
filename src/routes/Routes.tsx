@@ -8,6 +8,7 @@ import Feed from '../pages/Dashboard/Feed';
 import Draft from '../pages/Dashboard/Draft';
 import { useAuth } from '../context/AuthContext';
 import PrivateRoutes from './PrivateRoutes';
+import Post from '../pages/Dashboard/Post';
 
 const AppRoutes = () => {
 	const { currentUser } = useAuth();
@@ -18,7 +19,7 @@ const AppRoutes = () => {
 				<Route index element={<Home />} />
 				<Route element={<Dashboardlayout />}>
 					<Route path="feed" element={<Feed />} />
-					<Route path="feed/:title/:id" element={<Feed />} />
+					<Route path="feed/:title/:id" element={<Post />} />
 				</Route>
 				<Route path="login" element={currentUser ? <Navigate to="/feed" /> : <Auth />} />
 				<Route path="*" element={<PrivateRoutes />} />
