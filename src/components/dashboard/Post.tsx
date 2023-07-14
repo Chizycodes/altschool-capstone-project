@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { getDate, getReadTime, parseContent, getLinkTitle } from '../../utils/requests';
 
 const Post = ({ post }) => {
+	let body = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, totam quasi. Alias et, ratione distinctio perferendis odit vero veniam fuga qui error quidem autem, unde, nisi nostrum? Sed sapiente, nam nobis accusantium laboriosam sunt vero laborum facilis similique nulla perspiciatis beatae natus et. Temporibus quos sint praesentium omnis. Adipisci laudantium sapiente quisquam minus quae, in illum quam dolorem voluptate, suscipit qui tempore. Molestias ducimus voluptatem consectetur laborum. Facilis blanditiis quaerat vel aperiam voluptatem sit beatae accusamus voluptate, incidunt et itaque enim ut eos fuga? Ad ratione debitis, vel nihil architecto nemo tenetur perferendis consectetur sint, dolores quo animi a eveniet!"
 	return (
 		<div className="card card-body border border-light_gray shadow-sm mb-5">
 			<div>
@@ -28,12 +29,12 @@ const Post = ({ post }) => {
 				</div>
 
 				<div className="flex">
-					<div className="w-[80%]">
+					<div className="w-[80%] mr-3">
 						<Link to={`/feed/${getLinkTitle(post?.title)}/${post?.id}`}>
 							<h2 className="text-xl mt-3 font-bold cursor-pointer hover:text-primary">{post?.title}</h2>
 						</Link>
 
-						<p className="text-gray text-sm mt-2">{parseContent(post?.body)}</p>
+						<p className="text-gray text-sm mt-2">{parseContent(post?.body)?.substring(0, 200) + '...'}</p>
 					</div>
 
 					<div className="w-[20%] h-[120px] mt-4 rounded-lg overflow-hidden">
