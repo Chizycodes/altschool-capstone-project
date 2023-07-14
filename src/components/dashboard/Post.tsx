@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { getDate, getReadTime, parseContent, getLinkTitle } from '../../utils/requests';
 
 const Post = ({ post }) => {
-	let body = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, totam quasi. Alias et, ratione distinctio perferendis odit vero veniam fuga qui error quidem autem, unde, nisi nostrum? Sed sapiente, nam nobis accusantium laboriosam sunt vero laborum facilis similique nulla perspiciatis beatae natus et. Temporibus quos sint praesentium omnis. Adipisci laudantium sapiente quisquam minus quae, in illum quam dolorem voluptate, suscipit qui tempore. Molestias ducimus voluptatem consectetur laborum. Facilis blanditiis quaerat vel aperiam voluptatem sit beatae accusamus voluptate, incidunt et itaque enim ut eos fuga? Ad ratione debitis, vel nihil architecto nemo tenetur perferendis consectetur sint, dolores quo animi a eveniet!"
 	return (
 		<div className="card card-body border border-light_gray shadow-sm mb-5">
 			<div>

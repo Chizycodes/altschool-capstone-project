@@ -3,10 +3,10 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Button from '../general/Button';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { toast } from 'react-toastify';
-import { addDoc, setDoc, collection, serverTimestamp, doc } from 'firebase/firestore';
+import { addDoc, setDoc, collection, serverTimestamp, doc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 
@@ -33,10 +33,21 @@ const Register = () => {
 		setLoading(true);
 		const { emailAddress, password, firstName, lastName, username } = data;
 		try {
-			const res = await createUserWithEmailAndPassword(auth, emailAddress, password);
+			const usernameQuery = query(collection(db, 'users'), where('username', '==', username));
+			const usernameQuerySnapshot = await getDocs(usernameQuery);
+			if (!usernameQuerySnapshot.empty) {
+				setLoading(false);
+				toast.error('Username is already taken.');
+				return;
+			}
 
-			const user = await setDoc(doc(db, 'users', res?.user?.uid), {
-				id: res?.user?.uid,
+			const { user } = await createUserWithEmailAndPassword(auth, emailAddress, password);
+			// console.log(user);
+			// Send email verification
+			// await sendEmailVerification(user);
+
+			await setDoc(doc(db, 'users', user?.uid), {
+				id: user?.uid,
 				firstName,
 				lastName,
 				emailAddress,
@@ -50,6 +61,7 @@ const Register = () => {
 		} catch (error) {
 			const errorCode = error.code;
 			const errorMessage = error.message;
+			console.log(errorCode, errorMessage);
 			setLoading(false);
 			toast.error(errorCode);
 		}
